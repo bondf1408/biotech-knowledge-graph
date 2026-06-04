@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Biotech Knowledge Graph — DVA / CBGVA / THCVA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; overflow: hidden; }
+
+/* ── Controls bar ── */
+#controls {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+  display: flex; align-items: center; gap: 8px; padding: 7px 12px;
+  background: rgba(15,23,42,0.97); border-bottom: 1px solid #1e293b; flex-wrap: wrap;
+}
+#controls h1 { font-size: 12px; font-weight: 700; color: #64748b; white-space: nowrap; }
+.btn-group { display: flex; gap: 3px; flex-wrap: wrap; }
+.filter-btn {
+  padding: 2px 9px; border-radius: 20px; border: 1.5px solid;
+  font-size: 10px; font-weight: 700; cursor: pointer; transition: opacity .15s; background: transparent;
+}
+.filter-btn.inactive { opacity: 0.25; }
+.sep { width: 1px; background: #1e293b; align-self: stretch; margin: 0 4px; }
+#search { background: #1e293b; border: 1px solid #334155; color: #e2e8f0;
+  border-radius: 6px; padding: 3px 8px; font-size: 11px; width: 140px; }
+#search::placeholder { color: #475569; }
+#hint { font-size: 10px; color: #334155; }
+
+/* ── Selection tray ── */
+#sel-tray {
+  position: fixed; top: 38px; left: 50%; transform: translateX(-50%); z-index: 290;
+  display: none; align-items: center; gap: 8px; padding: 5px 12px;
+  background: rgba(15,23,42,0.97); border: 1px solid #3b82f6; border-radius: 20px;
+  font-size: 11px; color: #93c5fd; white-space: nowrap;
+}
+#sel-tray b { color: #60a5fa; }
+#sel-tray button { background: #1e3a5f; border: 1px solid #3b82f6; color: #93c5fd;
+  border-radius: 4px; padding: 2px 8px; font-size: 10px; cursor: pointer; }
+#sel-tray button:hover { background: #2563eb; color: #fff; }
+#sel-chips { display: flex; gap: 4px; flex-wrap: wrap; max-width: 500px; }
+.sel-chip { padding: 1px 7px; border-radius: 10px; font-size: 10px; font-weight: 700; cursor: pointer; }
+.sel-chip:hover { opacity: 0.7; }
+
+/* ── Panel base ── */
+.panel {
+  position: fixed; z-index: 200; width: 310px;
+  background: rgba(10,18,36,0.98); border: 1px solid #334155;
+  border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  display: none; overflow: hidden; min-width: 260px;
+}
+.panel-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 11px; cursor: grab; background: rgba(30,41,59,0.9);
+  border-bottom: 1px solid #1e293b; flex-shrink: 0;
+}
+.panel-header:active { cursor: grabbing; }
+.panel-title { flex: 1; font-size: 12px; font-weight: 700; color: #e2e8f0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.panel-btn { background: none; border: none; color: #475569; cursor: pointer;
+  font-size: 14px; padding: 0 3px; line-height: 1; flex-shrink: 0; }
+.panel-btn:hover { color: #e2e8f0; }
+.panel-body { padding: 11px; overflow-y: auto; max-height: 56vh; transition: max-height .2s, padding .2s; }
+.panel-body.collapsed { max-height: 0; padding: 0; overflow: hidden; }
+
+/* ── Node card internals ── */
+.card-badge { display: inline-block; font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+.card-desc { font-size: 12px; color: #94a3b8; line-height: 1.6; margin-bottom: 8px; }
+.card-meta { display: grid; grid-template-columns: auto 1fr; gap: 3px 8px; margin-bottom: 8px; }
+.card-meta-k { font-size: 10px; color: #475569; white-space: nowrap; }
+.card-meta-v { font-size: 11px; color: #cbd5e1; }
+.conf-bar { display: inline-flex; gap: 2px; }
+.conf-pip { width: 8px; height: 8px; border-radius: 2px; }
+.quant-block { background: #0f172a; border: 1px solid #1e293b; border-radius: 6px;
+  padding: 7px 9px; margin-bottom: 8px; }
+.quant-row { font-size: 11px; color: #94a3b8; padding: 2px 0;
+  border-bottom: 1px solid #1e293b; display: flex; gap: 6px; }
+.quant-row:last-child { border-bottom: none; }
+.quant-k { color: #64748b; flex-shrink: 0; }
+.quant-v { color: #e2e8f0; font-weight: 600; }
+.tag-strip { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; }
+.tag { background: #1e293b; border-radius: 3px; padding: 1px 5px; font-size: 10px; color: #64748b; }
+.sec-hdr { font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: #334155; margin: 10px 0 5px; }
+.rel-row {
+  display: flex; align-items: center; gap: 5px; padding: 4px 7px;
+  border-radius: 6px; margin-bottom: 2px; cursor: pointer;
+  border: 1px solid transparent; transition: background .1s;
+}
+.rel-row:hover { background: #1e293b; border-color: #334155; }
+.rel-dir { font-size: 13px; font-weight: 800; flex-shrink: 0; }
+.rel-name { flex: 1; font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rel-lbl { font-size: 9px; color: #475569; flex-shrink: 0; background: #1e293b; padding: 1px 4px; border-radius: 3px; }
+
+/* ── Connection panel ── */
+#conn-panel { bottom: 12px; right: 14px; width: 300px; }
+.conn-node { background: #0f172a; border: 1px solid #1e293b; border-radius: 7px; padding: 9px 10px; margin-bottom: 6px; }
+.conn-node-title { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+.conn-node-desc { font-size: 11px; color: #64748b; line-height: 1.5; }
+.conn-arrow { text-align: center; font-size: 22px; color: #334155; margin: 2px 0; line-height: 1; }
+.conn-lbl { text-align: center; background: #1e293b; border-radius: 5px;
+  padding: 4px 10px; font-size: 12px; font-weight: 600; color: #94a3b8; margin: 4px 0 6px; }
+
+/* ── Compare panel ── */
+#cmp-panel { top: 52px; right: 14px; width: 340px; }
+.cmp-cards { display: flex; flex-direction: column; gap: 8px; }
+.cmp-card { background: #0f172a; border-radius: 7px; border: 1px solid #1e293b; padding: 9px; }
+.cmp-card-title { font-size: 11px; font-weight: 700; margin-bottom: 3px; }
+.cmp-card-desc { font-size: 10px; color: #64748b; line-height: 1.5; }
+.cmp-inner-links { margin-top: 6px; }
+.cmp-link { font-size: 10px; color: #3b82f6; padding: 1px 0; }
+
+/* ── Legend ── */
+.legend {
+  position: fixed; right: 12px; top: 46px; z-index: 100;
+  background: rgba(10,18,36,0.95); border: 1px solid #1e293b;
+  border-radius: 8px; padding: 8px 10px; max-height: calc(100vh - 60px); overflow-y: auto;
+}
+.legend-item { display: flex; align-items: center; gap: 5px; margin-bottom: 4px;
+  font-size: 10px; color: #64748b; cursor: pointer; }
+.legend-item:hover { color: #94a3b8; }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+#zoom-info { position: fixed; bottom: 10px; right: 12px; font-size: 10px; color: #334155; z-index: 100; }
+
+/* ── Graph styles ── */
+svg { width: 100vw; height: 100vh; }
+.link { stroke-opacity: 0.3; }
+.link.sel-link { stroke-opacity: 1; stroke-width: 3; }
+.node circle { stroke-width: 1.5; cursor: pointer; }
+.node circle:hover { stroke-width: 3; }
+.node text { pointer-events: none; fill: #cbd5e1; font-size: 10px; font-weight: 600; }
+.node.dimmed { opacity: 0.06; }
+.node.highlighted circle { stroke-width: 3; }
+.node.selected circle { stroke-width: 3.5; filter: drop-shadow(0 0 6px currentColor); }
+.node.searched circle { stroke-width: 4; filter: brightness(1.5); }
+</style>
+</head>
+<body>
+
+<div id="controls">
+  <h1>🧬 DVA/CBGVA/THCVA Graph</h1>
+  <div class="btn-group" id="filter-btns"></div>
+  <div class="sep"></div>
+  <input type="text" id="search" placeholder="Поиск...">
+  <div class="sep"></div>
+  <span id="hint">Клик = карточка · Ctrl+Клик = выделение · Scroll = зум</span>
+</div>
+
+<div id="sel-tray">
+  <b id="sel-count">0</b> выбрано
+  <div id="sel-chips"></div>
+  <button onclick="openCompare()">Сравнить</button>
+  <button onclick="clearSelection()">✕ Очистить</button>
+</div>
+
+<!-- Node card -->
+<div class="panel" id="node-panel" style="bottom:12px;left:12px;">
+  <div class="panel-header" id="node-hdr">
+    <span class="panel-title" id="node-title">—</span>
+    <button class="panel-btn" id="node-col-btn" onclick="togglePanel('node')" title="Свернуть">▾</button>
+    <button class="panel-btn" onclick="closePanel('node')" title="Закрыть">✕</button>
+  </div>
+  <div class="panel-body" id="node-body"></div>
+</div>
+
+<!-- Connection detail -->
+<div class="panel" id="conn-panel">
+  <div class="panel-header" id="conn-hdr">
+    <span class="panel-title">Связь</span>
+    <button class="panel-btn" id="conn-col-btn" onclick="togglePanel('conn')" title="Свернуть">▾</button>
+    <button class="panel-btn" onclick="closePanel('conn')" title="Закрыть">✕</button>
+  </div>
+  <div class="panel-body" id="conn-body"></div>
+</div>
+
+<!-- Compare panel -->
+<div class="panel" id="cmp-panel">
+  <div class="panel-header" id="cmp-hdr">
+    <span class="panel-title" id="cmp-title">Сравнение</span>
+    <button class="panel-btn" id="cmp-col-btn" onclick="togglePanel('cmp')" title="Свернуть">▾</button>
+    <button class="panel-btn" onclick="closePanel('cmp')" title="Закрыть">✕</button>
+  </div>
+  <div class="panel-body" id="cmp-body"></div>
+</div>
+
+<div class="legend" id="legend"></div>
+<div id="zoom-info">—</div>
+<svg id="graph"></svg>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════════════════════════
+const TYPES = {
+  CMP: { label:"Соединения",      color:"#22c55e", r:18 },
+  MET: { label:"Метаболиты",      color:"#86efac", r:14 },
+  ENZ: { label:"Ферменты",        color:"#a855f7", r:16 },
+  GEN: { label:"Гены/Модиф.",     color:"#3b82f6", r:13 },
+  PWY: { label:"Пути синтеза",    color:"#eab308", r:14 },
+  ADD: { label:"Добавки/Кофакт.", color:"#f97316", r:12 },
+  LIT: { label:"Литература",      color:"#f43f5e", r:12 },
+  MED: { label:"Среда/Условия",   color:"#06b6d4", r:13 },
+  STR: { label:"Штаммы",          color:"#ef4444", r:14 },
+  ORG: { label:"Организмы",       color:"#ec4899", r:12 },
+  TER: { label:"Терпены/Аналоги", color:"#14b8a6", r:11 },
+  PRO: { label:"Процессы",        color:"#64748b", r:12 },
+  PLS: { label:"Плазмиды",        color:"#84cc16", r:11 },
+};
+
+const nodes = [
+  // CMP
+  {id:"DVA",   label:"DVA",   type:"CMP", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
+   source:"Luo 2019 / Ma 2022",
+   detail:"Divarinic acid — C3 поликетид, предшественник CBGVA. Синтезируется из propionyl-CoA + 3×malonyl-CoA через OLS→OAC. Стартовый продукт STR-001.",
+   quant:[["Ожид. тит. (расч.)","100–300 мг/л"],["C-цепь стартера","C3 (пропионил)"],["Путь","OLS+OAC, тетракетид"]],
+   tags:["DVA","polyketide","C3","precursor"]},
+
+  {id:"CBGVA", label:"CBGVA", type:"CMP", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["CBGVA"], pathway:"PWY-0002",
+   source:"Luo 2019",
+   detail:"Cannabigerovarinic acid — DVA + GPP → CBGVA (CsPT4). Промежуточный каннабиноид, предшественник THCVA. Передаётся от STR-001 к STR-002.",
+   quant:[["Путь пренилир.","DVA + GPP → CBGVA"],["Фермент","CsPT4 (мембраносвяз.)"]],
+   tags:["CBGVA","C3-cannabinoid","intermediate"]},
+
+  {id:"THCVA", label:"THCVA", type:"CMP", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["THCVA"], pathway:"PWY-0003",
+   source:"Ludwig 2019",
+   detail:"Tetrahydrocannabivarinic acid — КОНЕЧНЫЙ ЦЕЛЕВОЙ ПРОДУКТ. CBGVA → THCVA (THCAS, FAD-зависимая оксидоредуктаза, pH 4.5–5.5, O₂). Предшественник THCV (декарбоксилирование).",
+   quant:[["Прогноз тит. STR-002","5–15 мг/л"],["Km THCAS для CBGA","~15 µM"],["pH оптимум THCAS","4.5–5.5"],["Аналог","THCA (C5) до 8 мг/л в S.cer."]],
+   tags:["THCVA","target","C3-cannabinoid"]},
+
+  // MET
+  {id:"propionyl-CoA", label:"Propionyl-CoA", type:"MET", confidence:"low",
+   organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
+   source:"Инференс из OLA-пути",
+   detail:"C3 стартовая единица для OLS в DVA-пути. Активируется CoA-лигазой (PCS) из внешнего пропионата. Лимитирующий предшественник — эндогенный пул минимален.",
+   quant:[["Источник","Пропионат → PCS-лигаза → CoA"],["Токсич. пропионата",">5 г/л"],["Аналог","Гексаноил-CoA (C5 для OLA)"]],
+   tags:["propionyl-CoA","starter-unit","C3"]},
+
+  {id:"malonyl-CoA", label:"Malonyl-CoA", type:"MET", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["DVA","CBGVA","THCVA"], pathway:"PWY-0001",
+   source:"Ma 2022",
+   detail:"Удлиняющая единица для OLS (3 молекулы на цикл). Производится ACC1 из acetyl-CoA + CO₂. Ключевой лимитирующий метаболит — конкурирует с синтезом жирных кислот.",
+   quant:[["OE ACC1 эффект","1.8 → 8.9 мг/л OLA (+395%)"],["Лимитир. фермент","ACC1 (биотин-завис.)"],["Конкурент","Синтаза жирных к-т (FAS)"]],
+   tags:["malonyl-CoA","extender","ACC1","bottleneck"]},
+
+  {id:"acetyl-CoA", label:"Acetyl-CoA", type:"MET", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Обзор метаболизма Y.lipolytica",
+   detail:"Центральный метаболит. Субстрат ACC1 → malonyl-CoA. Источники: гликолиз (PDH), β-окисление, ацетат (ACS). Y. lipolytica имеет крупный пул → преимущество перед S.cerevisiae.",
+   quant:[["Пул Y.lipolytica","Крупнее vs S.cerevisiae"],["Пероксисома","Высокий пул для β-окисл."],["Источники","Глюкоза/глицерин/ацетат"]],
+   tags:["acetyl-CoA","central-metabolite","pool"]},
+
+  {id:"GPP", label:"GPP", type:"MET", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["CBGVA","THCVA"], pathway:"PWY-0004",
+   source:"Ma 2022 / обзор MVA",
+   detail:"Геранилпирофосфат. Донор пренильной группы для CsPT4 (DVA+GPP → CBGVA). Производится ERG20 из IPP+DMAPP. Конкурирует за IPP с эргостеролом.",
+   quant:[["ERG20 мутант","F96W-N119W → ↑GPP/FPP"],["Конкурент","ERG9 → сквален/стерол"]],
+   tags:["GPP","isoprenoid","MVA"]},
+
+  {id:"OLA", label:"OLA", type:"MET", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["OLA"], pathway:"PWY-0001",
+   source:"Ma 2022 DOI: 10.1038/s42003-022-04202-1",
+   detail:"Olivetolic acid — C5 аналог DVA (hexanoyl-CoA стартер вместо propionyl-CoA). Референсная молекула из Ma 2022. YL128: 8.93 мг/л.",
+   quant:[["YL101 (исх.)","0.103 мг/л"],["YL128 (финал)","8.93 мг/л (+87×)"],["CaCO₃ буфер","1.1 → 5.8 мг/л"],["hexanoate 0.5 мМ","↑OLA 48 ч"]],
+   tags:["OLA","olivetolic-acid","C5","reference"]},
+
+  // ENZ
+  {id:"ENZ-OLS", label:"OLS/TKS", type:"ENZ", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
+   source:"Luo 2019 / Ma 2022",
+   detail:"Olivetol/tetraketide synthase. Тип III PKS. Конденсирует propionyl-CoA + 3×malonyl-CoA → тетракетидный интермедиат. Специфичность к starter-unit критична: гексаноил vs пропионил vs бутирил.",
+   quant:[["Тип","Type III PKS"],["Субстрат (стартер)","Propionyl-CoA (C3 для DVA)"],["Km hexanoyl","~20–50 µM (оценка)"],["Продукт","Тетракетид → OAC"]],
+   tags:["OLS","TKS","PKS","type-III","starter-specificity"]},
+
+  {id:"ENZ-OAC", label:"OAC", type:"ENZ", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
+   source:"Austin 2004 / Gagne 2012",
+   detail:"Olivetolic acid cyclase. Циклизует тетракетидный интермедиат → DVA (C3) или OLA (C5). Требует Mg²⁺ или Mn²⁺ для стабилизации активного центра. pH-оптимум 5.5–6.0.",
+   quant:[["pH оптимум","5.5–6.0"],["Кофактор","Mg²⁺ 0.5–1 мМ (или Mn²⁺)"],["T оптимум","28–30°C"],["Продукт","DVA или OLA"]],
+   tags:["OAC","cyclase","Mg2+","pH-sensitive"]},
+
+  {id:"ENZ-CsPT4", label:"CsPT4", type:"ENZ", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["CBGVA"], pathway:"PWY-0002",
+   source:"Luo 2019 DOI: 10.1126/science.aaw1875",
+   detail:"Ароматическая пренилтрансфераза. DVA + GPP → CBGVA (или OLA + GPP → CBGA). Мембраносвязанная/микросомальная. Km OA = 6.73 µM. Не-Michaelis-Menten поведение по GPP.",
+   quant:[["Km (OA)","6.73 ± 0.26 µM"],["GPP кинетика","Не-Michaelis-Menten"],["Локализация","Мембраносвязанная/ER"],["Инкубация","500 µM OA + 500 µM GPP, 30°C, 1 ч"]],
+   tags:["CsPT4","prenyltransferase","membrane","Km"]},
+
+  {id:"ENZ-THCS", label:"THCAS", type:"ENZ", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["THCVA"], pathway:"PWY-0003",
+   source:"Laverty 2019",
+   detail:"THCA synthase. FAD-зависимая оксидоредуктаза. CBGVA → THCVA (или CBGA → THCA). Оптимум pH 4.5–5.5, требует O₂ как акцептор. Нестабильна при >30°C.",
+   quant:[["Km (CBGA)","~15 µM"],["Vmax","~0.45 нмоль/мин/мкг"],["pH оптимум","4.5–5.5"],["Кофактор","FAD (ковалентно связан)"],["O₂","Обязателен как акцептор е⁻"]],
+   tags:["THCAS","FAD","oxidase","pH-4.5","O2-dependent"]},
+
+  {id:"ENZ-ACC1", label:"ACC1", type:"ENZ", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Ma 2022 / Tai 2016",
+   detail:"Ацетил-CoA карбоксилаза. Acetyl-CoA + HCO₃⁻ + ATP → malonyl-CoA. Биотин-зависимая. Лимитирующий фермент мalonyl-CoA пула. Ингибируется фосфорилированием (Snf1-киназа).",
+   quant:[["OE эффект","1.8 → 8.9 мг/л OLA (+395%)"],["Мутант S667A/S1178A","Feedback-нечувствит."],["Кофактор","Биотин (0.02–0.1 мг/л среды)"],["Mg²⁺ зависимость","Да (карбоксилирование)"]],
+   tags:["ACC1","biotin","malonyl-CoA","rate-limiting","Snf1"]},
+
+  {id:"ENZ-ERG20", label:"ERG20", type:"ENZ", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"PWY-0004",
+   source:"Обзор MVA Y.lipolytica",
+   detail:"FPP/GPP synthase. IPP + DMAPP → GPP (→FPP). Mg²⁺-зависимая. Мутант F96W-N119W накапливает GPP. Конкурирует за GPP с CsPT4 (нужен GPP) vs ERG9 (сквален).",
+   quant:[["Мутант F96W-N119W","↑GPP, ↓FPP"],["Кофактор","Mg²⁺"],["Конкурент","ERG9 (сквален)"]],
+   tags:["ERG20","GPP","FPP","MVA","mutation"]},
+
+  // PWY
+  {id:"PWY-0001", label:"Polyketide", type:"PWY", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["DVA"], pathway:"—",
+   source:"Ma 2022",
+   detail:"Поликетидная ветвь: Propionyl-CoA + 3×malonyl-CoA → (OLS) → тетракетид → (OAC) → DVA. Кофакторы: Mg²⁺, биотин (для ACC1). pH 5.5–6.0.",
+   quant:[["Шаги","2 фермента: OLS + OAC"],["Стехиометрия","1 propionyl + 3 malonyl"],["Лимит","Пул malonyl-CoA"]],
+   tags:["polyketide","DVA","OLS","OAC"]},
+
+  {id:"PWY-0002", label:"Prenylation", type:"PWY", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["CBGVA"], pathway:"—",
+   source:"Luo 2019",
+   detail:"Пренилирование: DVA + GPP → CBGVA (CsPT4). Требует GPP из MVA-пути. CsPT4 мембраносвязана.",
+   quant:[["Km CsPT4 (OA)","6.73 µM"],["Субстраты","DVA + GPP"]],
+   tags:["prenylation","CBGVA","CsPT4","GPP"]},
+
+  {id:"PWY-0003", label:"Oxidocycl.", type:"PWY", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["THCVA"], pathway:"—",
+   source:"Laverty 2019",
+   detail:"Окислительная циклизация: CBGVA → THCVA (THCAS + FAD + O₂). pH 4.5–5.5. Последний шаг пути.",
+   quant:[["Шаг","CBGVA + FAD + O₂ → THCVA + FADH₂"],["pH opt","4.5–5.5"]],
+   tags:["oxidocyclization","THCVA","THCAS","FAD"]},
+
+  {id:"PWY-0004", label:"MVA→GPP", type:"PWY", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"—",
+   source:"Обзор Y.lipolytica терпены",
+   detail:"Мевалонатный путь: Acetyl-CoA → HMG-CoA → (HMG-CoAR) → MVA → IPP+DMAPP → (ERG20) → GPP. Нативный путь Y.lipolytica.",
+   quant:[["Референс титр","1628 мг/л сквалена (TER-001)"],["Ключевой ген","tHMG1 (truncated HMG-CoA R)"]],
+   tags:["MVA","GPP","isoprenoid","native"]},
+
+  // GEN
+  {id:"GEN-001", label:"GEN-001", type:"GEN", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["DVA","CBGVA","THCVA"], pathway:"PWY-0001",
+   source:"Ma 2022 DOI: 10.1038/s42003-022-04202-1",
+   detail:"Гетерологичная экспрессия OLS, OAC, CsPT4 в Y. lipolytica. Базовая конструкция для каннабиноидного пути. Вектор pYLXP', промотор TEF1 или hp4d.",
+   quant:[["YL101 (OLS+OAC)","0.103 мг/л OLA"],["YL110 +LvaE","1.04 мг/л"],["YL128 (финал)","8.93 мг/л (+87×)"]],
+   tags:["heterologous","OLS","OAC","CsPT4","pYLXP"]},
+
+  {id:"GEN-002", label:"GEN-002", type:"GEN", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["DVA","CBGVA","THCVA"], pathway:"PWY-0001",
+   source:"Ma 2022",
+   detail:"ACC1 overexpression → ↑malonyl-CoA → ↑поликетидный синтез. Вариант ylACC1 (без интрона). Мутант S667A/S1178A — feedback-нечувствительная версия.",
+   quant:[["YL115 +ylACC1","1.857 мг/л OLA"],["vs YL110","1.04 → 1.857 (+79%)"],["Мутант","S659A: ↑активность"]],
+   tags:["ACC1","malonyl-CoA","OE","intron-removed"]},
+
+  {id:"GEN-003", label:"GEN-003", type:"GEN", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["CBGVA","THCVA"], pathway:"PWY-0004",
+   source:"Обзор TER / MVA в Y.lipolytica",
+   detail:"Усиление MVA-пути → ↑GPP пул для CsPT4. tHMG1 overexpression, IDI1 overexpression. ERG20 мутант F96W-N119W для накопления GPP.",
+   quant:[["tHMG1 OE","↑изопреноид 2–4×"],["ERG20 F96W-N119W","↑GPP/FPP соотн."]],
+   tags:["MVA","GPP","tHMG1","IDI","ERG20"]},
+
+  {id:"GEN-004", label:"GEN-004", type:"GEN", confidence:"low",
+   organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
+   source:"Инференс из OLA-пути",
+   detail:"Снабжение пропионил-CoA: PCS-лигаза (propionyl-CoA synthetase), LvaE-путь. Нет прямых данных для Y.lipolytica + DVA — инференс из аналогов.",
+   quant:[["Статус","[HYPOTHESIS] — нет прямых данных"],["Источник CoA","PCS + внешний пропионат"]],
+   tags:["propionyl-CoA","PCS","supply","hypothesis"]},
+
+  {id:"GEN-ACC1-OE", label:"ACC1-OE-YL", type:"GEN", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["DVA","CBGVA","THCVA"], pathway:"PWY-0001",
+   source:"Ma 2022",
+   detail:"Overexpression ylACC1 (intron-removed). Прямое увеличение malonyl-CoA пула. Один из ключевых шагов в YL128.",
+   quant:[["YL115","1.857 мг/л OLA (ylACC1 OE)"]],
+   tags:["ACC1","ylACC1","intron-removed","malonyl-CoA"]},
+
+  {id:"GEN-OAC-YL", label:"OAC-YL", type:"GEN", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
+   source:"Ma 2022",
+   detail:"Экспрессия OAC в Y. lipolytica. Нужен Mg²⁺, pH 5.5–6.0. Критична специфичность — проверить работу с propionyl-CoA (C3) vs hexanoyl-CoA (C5).",
+   quant:[["pH opt","5.5–6.0"],["Кофактор","Mg²⁺"],["Риск","Cross-reactivity с C5-тетракетидом"]],
+   tags:["OAC","Yl-expression","Mg2+"]},
+
+  {id:"GEN-THCS-YL", label:"THCAS-YL", type:"GEN", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["THCVA"], pathway:"PWY-0003",
+   source:"Ludwig 2019",
+   detail:"Экспрессия THCAS в Y. lipolytica. FAD-зависимая оксидоредуктаза. pH 4.5–5.5 (конфликт с pH роста 5.5–6.0). Возможна секреция для работы в кислых везикулах.",
+   quant:[["pH opt","4.5–5.5 (конфликт с ростом)"],["Нужен","FAD + O₂"],["Статус","Без прямых данных в Yl"]],
+   tags:["THCAS","Yl-expression","FAD","pH-conflict"]},
+
+  {id:"GEN-PCS-YL", label:"PCS-YL", type:"GEN", confidence:"low",
+   organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
+   source:"Инференс",
+   detail:"Propionyl-CoA synthetase — активирует пропионат до propionyl-CoA. Нет прямых данных в контексте DVA-пути в Y. lipolytica.",
+   quant:[["Статус","[HYPOTHESIS]"],["Аналог","PpLvaE для гексаноил-CoA (Ma 2022)"]],
+   tags:["PCS","propionyl-CoA","synthetase"]},
+
+  {id:"GEN-MVA-YL", label:"MVA-YL", type:"GEN", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["CBGVA","THCVA"], pathway:"PWY-0004",
+   source:"TER-001–009",
+   detail:"Усиление мевалонатного пути (tHMG1, IDI). ↑GPP для пренилирования CsPT4. Референс — сквален 1628 мг/л в Y.lipolytica.",
+   quant:[["tHMG1 OE","Ключевой шаг ↑MVA"],["Референс","YLSQ9: 1628 мг/л сквалена"]],
+   tags:["MVA","tHMG1","IDI","GPP"]},
+
+  {id:"GEN-TEF1",  label:"TEF1-промотор",  type:"GEN", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Ma 2022",
+   detail:"Сильный конститутивный промотор TEF1 (с интроном). Основной промотор для OLS, OAC, ACC1 в Y. lipolytica. Вариант: TEF-intron для улучшенной экспрессии.",
+   quant:[["Сила","Сильный конститутивный"],["Вариант","TEF-intron > TEF"],["Применение","OLS, OAC, ACC1 (Ma 2022)"]],
+   tags:["TEF1","promoter","constitutive","strong"]},
+
+  {id:"GEN-hp4d",  label:"hp4d-промотор",  type:"GEN", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Ma 2022",
+   detail:"Гибридный промотор hp4d. Сильный в стационарной фазе / при лимитировании азота. Используется для генов продуктивной фазы.",
+   quant:[["Активация","Статион. фаза / -N"],["Сила","~TEF1 в продукт. фазе"]],
+   tags:["hp4d","promoter","nitrogen-responsive"]},
+
+  {id:"GEN-PTS1",  label:"PTS1-сигнал",    type:"GEN", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Ma 2022 (ylPEX10)",
+   detail:"Пероксисомальный таргетинговый сигнал PTS1. Направляет ферменты в пероксисомы Y. lipolytica — доступ к высокому пулу ацетил-CoA. ylPEX10 OE → +YL122: 4.797 мг/л OLA.",
+   quant:[["YL122 +ylPEX10","4.797 мг/л OLA (vs 3.49)"],["Эффект","Перокс. OLS → ↑ацетил-CoA доступность"]],
+   tags:["PTS1","peroxisome","targeting","acetyl-CoA"]},
+
+  {id:"GEN-CODON", label:"Кодон-опт.",      type:"GEN", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Обзор",
+   detail:"Кодонная оптимизация генов Cannabis sativa (OLS, OAC, CsPT4, THCAS) под кодонные предпочтения Y. lipolytica. Повышает трансляционную эффективность на 20–60%.",
+   quant:[["Эффект","↑трансляция 20–60% (оценка)"]],
+   tags:["codon-optimization","translation","expression"]},
+
+  {id:"GEN-POX2",  label:"POX2-промотор",  type:"GEN", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Обзор",
+   detail:"POX2 промотор — индуцируется жирными кислотами, активен при пероксисомальных условиях. Используется для генов, локализованных в пероксисомах.",
+   quant:[["Активация","Жирные кислоты / олеиновая к-та"]],
+   tags:["POX2","promoter","fatty-acid","peroxisome"]},
+
+  {id:"GEN-KET-YL",label:"KET-YL",         type:"GEN", confidence:"low",
+   organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
+   source:"Инференс",
+   detail:"Кетоацил-CoA тиолаза. Контроль длины цепи в поликетидном синтезе. Предотвращает преждевременное прерывание цепи.",
+   quant:[["Статус","[HYPOTHESIS]"]],
+   tags:["ketoacyl","thiolase","chain-length"]},
+
+  // ADD
+  {id:"ADD-biotin", label:"Биотин (B7)", type:"ADD", confidence:"high",
+   organism:"general", target:["DVA","CBGVA","THCVA"], pathway:"general",
+   source:"Biochemistry ACC1",
+   detail:"Кофактор ACC1 (биотин-карбоксилаза). Без биотина ACC1 не активна → нет malonyl-CoA → нет поликетидного синтеза. Биотин ковалентно связан с ACC1.",
+   quant:[["Норма в среде","0.02–0.1 мг/л"],["Насыщение ACC1","Требует проверки"],["Дефицит","→ Остановка malonyl-CoA"]],
+   tags:["biotin","B7","ACC1-cofactor","covalent"]},
+
+  {id:"ADD-FAD", label:"FAD (рибофлав.)", type:"ADD", confidence:"medium",
+   organism:"general", target:["THCVA"], pathway:"PWY-0003",
+   source:"Laverty 2019",
+   detail:"Кофактор THCAS. FAD-зависимая оксидоредуктаза. Рибофлавин (B2) — предшественник FAD. FAD может быть ковалентно связан с THCAS (требует проверки).",
+   quant:[["Функция","Акцептор е⁻ при окислении CBGVA"],["Связь","Ковалентная или нековалентная"],["Регенерация","O₂ + FADH₂ → FAD + H₂O₂"]],
+   tags:["FAD","riboflavin","B2","THCAS","oxidoreductase"]},
+
+  {id:"ADD-Mg", label:"Mg²⁺", type:"ADD", confidence:"medium",
+   organism:"general", target:["DVA","general"], pathway:"general",
+   source:"Обзор OAC/ACC1",
+   detail:"Кофактор OAC (стабилизация активного центра циклазы), ACC1, ERG20, ряда PKS. Стандартное содержание в среде 0.5–1 мМ MgSO₄. Дефицит → ↓активность OAC.",
+   quant:[["Норма среды","0.5–1 мМ MgSO₄"],["Для OAC","Mg²⁺ или Mn²⁺"],["Для ACC1","Обязателен"],["Для ERG20","Обязателен"]],
+   tags:["Mg2+","magnesium","OAC-cofactor","ACC1","ERG20"]},
+
+  {id:"ADD-Mn", label:"Mn²⁺", type:"ADD", confidence:"low",
+   organism:"general", target:["DVA"], pathway:"PWY-0001",
+   source:"Инференс из PKS литературы",
+   detail:"Альтернативный кофактор OAC и некоторых PKS. В ряде изоформ циклаз Mn²⁺ эффективнее Mg²⁺. MnSO₄ 1–5 мкМ в среде.",
+   quant:[["Норма","1–5 мкМ MnSO₄"],["Статус","[INFERRED] — нет прямых данных для OAC"]],
+   tags:["Mn2+","manganese","cyclase","PKS"]},
+
+  {id:"ADD-NADPH", label:"NADPH", type:"ADD", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["THCVA","general"], pathway:"general",
+   source:"Обзор редокс-баланса Y.lipolytica",
+   detail:"Редокс-баланс. Нужен для регенерации FAD в THCAS, восстановительных шагов PKS, нативного липидного метаболизма. Производится в пентозофосфатном пути (ПФП) и малат-ферментом.",
+   quant:[["Источники","ПФП, малат-фермент (Mae1)"],["Эффект OE","ylMAE1-ylANT1-McMAE2: +OLA в YL126"]],
+   tags:["NADPH","redox","PPP","malic-enzyme"]},
+
+  {id:"ADD-pantothen", label:"Пантотенат (B5)", type:"ADD", confidence:"medium",
+   organism:"general", target:["general"], pathway:"general",
+   source:"Biochemistry CoA",
+   detail:"Предшественник кофермента А (CoA). Без пантотената не синтезируется propionyl-CoA, malonyl-CoA, acetyl-CoA. Критично для всего поликетидного пути.",
+   quant:[["Функция","B5 → 4'-фосфопантотенат → CoA"],["Дефицит","→ Остановка всего ацил-CoA метаболизма"]],
+   tags:["B5","pantothenate","CoA-precursor","vitamin"]},
+
+  {id:"ADD-Fe", label:"Fe²⁺", type:"ADD", confidence:"low",
+   organism:"general", target:["CBGVA","THCVA"], pathway:"general",
+   source:"Обзор CYP450",
+   detail:"Кофактор CYP450 ферментов и пренилтрансфераз. Дефицит Fe → ↓P450-активность. 20–100 мкМ FeSO₄ в среде.",
+   quant:[["Норма","20–100 мкМ FeSO₄"],["Для CYP450","Обязателен (гем)"]],
+   tags:["Fe2+","iron","CYP450","heme"]},
+
+  {id:"ADD-propionate", label:"Пропионат", type:"ADD", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
+   source:"Инференс из OLA-пути (Ma 2022)",
+   detail:"Внешний источник propionyl-CoA для DVA-пути. CoA-лигаза активирует пропионат → propionyl-CoA. Оптимальная концентрация 0.5–5 г/л. Токсичен при >5 г/л.",
+   quant:[["Оптимум","0.5–5 г/л"],["Токсичность",">5 г/л → ↓рост"],["Аналог","Гексаноат 0.5 мМ (Ma 2022, OLA +OLA)"]],
+   tags:["propionate","propionyl-CoA","precursor","fed-batch"]},
+
+  {id:"ADD-CaCO3", label:"CaCO₃", type:"ADD", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["DVA","OLA"], pathway:"general",
+   source:"Ma 2022",
+   detail:"Буфер pH. Нейтрализует органические кислоты, поддерживает pH в оптимальном диапазоне. В Ma 2022: добавка 20 г/л CaCO₃ повысила OLA с 1.1 до 5.8 мг/л (+430%).",
+   quant:[["Концентрация","20 г/л"],["OLA без CaCO₃","1.113 мг/л (PBS)"],["OLA с CaCO₃","5.80 мг/л (+421%)"]],
+   tags:["CaCO3","pH-buffer","Ma2022","critical"]},
+
+  {id:"ADD-NaCl", label:"NaCl", type:"ADD", confidence:"low",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Инференс из осмотич. стресса Y.lipolytica",
+   detail:"Осмотический стресс. Перенаправляет углеродный поток от липидов к вторичным метаболитам через стрессовые пути. Оптимум 0.5–5% w/v.",
+   quant:[["Диапазон","0.5–5% w/v"],["Эффект","↑PKS экспрессия [INFERRED]"]],
+   tags:["NaCl","osmotic-stress","flux-redirect"]},
+
+  {id:"ADD-erythritol", label:"Эритритол", type:"ADD", confidence:"low",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Инференс из терпен-литературы",
+   detail:"Осмолит. Перераспределяет углеродный поток. +25–50% поликетидов в ряде экспериментов. Нативный для Y. lipolytica (производит его).",
+   quant:[["Концентрация","До 100 г/л"],["Эффект","↑вторичный метаболизм [INFERRED]"]],
+   tags:["erythritol","osmolyte","flux"]},
+
+  {id:"ADD-glycerol", label:"Глицерин", type:"ADD", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Обзор Y.lipolytica",
+   detail:"Альтернативный источник углерода. ↑NADPH профиль через пентозофосфатный путь. Медленнее роста vs глюкоза, но лучше редокс-баланс для NADPH-требующих ферментов.",
+   quant:[["NADPH эффект","↑ vs глюкоза"],["Рост","↓ скорость"],["Применение","Продуктивная фаза"]],
+   tags:["glycerol","C-source","NADPH"]},
+
+  {id:"ADD-cerulenin", label:"Церулейнин", type:"ADD", confidence:"medium",
+   organism:"general", target:["DVA","general"], pathway:"PWY-0001",
+   source:"Обзор поликетид-инженерия",
+   detail:"Ингибитор FAS (fatty acid synthase). Блокирует синтез жирных кислот → ↑malonyl-CoA для поликетидного синтеза. Инструмент исследования и потенциальная добавка.",
+   quant:[["Механизм","Ковалентный ингибитор FAS"],["Эффект","↑malonyl-CoA для PKS"],["Токсичность","Концентрационно-зависима"]],
+   tags:["cerulenin","FAS-inhibitor","malonyl-CoA","tool"]},
+
+  {id:"ADD-malonate", label:"Малонат", type:"ADD", confidence:"low",
+   organism:"general", target:["DVA","general"], pathway:"PWY-0001",
+   source:"Инференс",
+   detail:"Прямой источник malonyl-CoA через малонат-CoA лигазу. Снижает нагрузку на ACC1. Концентрация токсичности требует отработки.",
+   quant:[["Статус","[INFERRED]"],["Путь","Малонат + CoA → malonyl-CoA (лигаза)"]],
+   tags:["malonate","malonyl-CoA","alternative"]},
+
+  {id:"ADD-hexanoate", label:"Гексанат", type:"ADD", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["OLA"], pathway:"PWY-0001",
+   source:"Ma 2022",
+   detail:"C6 стартер для OLA-пути. В Ma 2022: 0.5 мМ гексаноат (подача 48 ч) → ↑OLA. Референс для DVA-пути — аналогично должен работать пропионат для C3-пути.",
+   quant:[["Концентрация","0.5 мМ"],["Подача","48 ч после посева"],["Эффект для OLA","Значимое увеличение"]],
+   tags:["hexanoate","hexanoyl-CoA","OLA-reference","Ma2022"]},
+
+  {id:"ADD-butyrate", label:"Бутират", type:"ADD", confidence:"low",
+   organism:"general", target:["DVA"], pathway:"PWY-0001",
+   source:"Инференс",
+   detail:"Источник бутирил-CoA (C4 стартер). Альтернатива пропионату для изучения специфичности OLS. Помогает понять субстратный диапазон OLS.",
+   quant:[["Статус","[INFERRED]"],["Применение","Тест специфичности OLS"]],
+   tags:["butyrate","butyryl-CoA","C4","OLS-specificity"]},
+
+  {id:"ADD-MeJA", label:"MeJA", type:"ADD", confidence:"low",
+   organism:"general", target:["general"], pathway:"general",
+   source:"Инференс из растительной литературы",
+   detail:"Метилжасмонат. Элиситор вторичного метаболизма. Активирует транскрипцию генов вторичного метаболизма в растениях и потенциально в микробных системах.",
+   quant:[["Статус","[HYPOTHESIS] для Y.lipolytica"]],
+   tags:["MeJA","elicitor","secondary-metabolism"]},
+
+  {id:"ADD-acetyl-sc", label:"Ацетил-CoA шорткат", type:"ADD", confidence:"low",
+   organism:"general", target:["general"], pathway:"general",
+   source:"PMID: 31470116",
+   detail:"Стратегия: альтернативный синтез acetyl-CoA через TAL/лизин/глутамат катаболизм. Снижает зависимость от PDH-комплекса. Перспективно для пероксисомального пула.",
+   quant:[["Статус","[STRATEGY/INFERRED]"]],
+   tags:["acetyl-CoA","shortcut","strategy","TAL"]},
+
+  {id:"ADD-amino", label:"Аминокисл.→malonyl", type:"ADD", confidence:"low",
+   organism:"general", target:["DVA","general"], pathway:"PWY-0001",
+   source:"Инференс",
+   detail:"Стратегия: использование катаболизма аминокислот (лизин, глутамат) для дополнительного malonyl-CoA пула. Альтернативный путь к malonyl-CoA без ACC1.",
+   quant:[["Статус","[STRATEGY/INFERRED]"]],
+   tags:["amino-acid","malonyl-CoA","strategy","alternative"]},
+
+  // LIT
+  {id:"LIT-qi2026", label:"Qi 2026", type:"LIT", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"PMID: 41781957 / DOI: 10.1186/s12934-026-02115-7",
+   detail:"Динамика ацетил-/малонил-CoA пулов в Y. lipolytica при EPA-поликетидном синтезе. Соотношение malonyl/acetyl-CoA определяет селективность поликетидного продукта.",
+   quant:[["PMID","41781957"],["Организм","Y. lipolytica"],["Ключевой вывод","Соотн. malonyl/acetyl-CoA → selektivität"]],
+   tags:["literature","2026","CoA-dynamics","EPA","Y.lipolytica"]},
+
+  {id:"LIT-hong2025", label:"Hong 2025", type:"LIT", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["CBGVA","THCVA"], pathway:"general",
+   source:"DOI: 10.1016/j.bidere.2025.100021",
+   detail:"De novo биосинтез каннабиноидов в Y. lipolytica. Биомолекулярные конденсаты для локализации ферментов пути. 5–15× улучшение.",
+   quant:[["DOI","10.1016/j.bidere.2025.100021"],["Стратегия","Биомолек. конденсаты"],["Эффект конденсатов","5–15× (оценка)"]],
+   tags:["literature","2025","de-novo","condensates","Y.lipolytica"]},
+
+  {id:"LIT-ma2021", label:"Ma 2021", type:"LIT", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["OLA"], pathway:"PWY-0001",
+   source:"DOI: 10.1101/2021.06.10.447928 (bioRxiv) → Ma 2022 published",
+   detail:"83-кратное увеличение OLA в Y. lipolytica. Преодоление лимитирующих шагов. Опубликован как Ma 2022 в Commun Biol.",
+   quant:[["OLA увеличение","83× (0.11 → 9.18 мг/л)"],["DOI","10.1038/s42003-022-04202-1"]],
+   tags:["literature","2021","OLA","83x","Ma2022","Y.lipolytica"]},
+
+  // MED
+  {id:"MED-001", label:"Среда база", type:"MED", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Ma 2022 / Обзор",
+   detail:"Базовая среда Y. lipolytica: глюкоза 20–80 г/л, (NH₄)₂SO₄ 5 г/л, KH₂PO₄, MgSO₄, ZnSO₄, FeSO₄, MnSO₄, CuSO₄. YPD или CSM для комплексных сред.",
+   quant:[["Глюкоза","20–80 г/л"],["Azot","(NH₄)₂SO₄ 2–5 г/л или мочевина"],["pH","Обычно 5.5–6.0"]],
+   tags:["medium","glucose","trace-metals","YPD","CSM"]},
+
+  {id:"MED-003", label:"pH стратегия", type:"MED", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["THCVA","DVA"], pathway:"general",
+   source:"Ma 2022 / Laverty 2019",
+   detail:"pH критичен: OAC оптимум 5.5–6.0, THCAS оптимум 4.5–5.5. Двухфазная стратегия: pH 5.5–6.0 при росте → pH 4.5–5.0 при продукции. CaCO₃ буфер: +430% OLA.",
+   quant:[["Рост-оптимум","pH 5.5–6.0"],["THCAS оптимум","pH 4.5–5.5"],["OAC оптимум","pH 5.5–6.0"],["CaCO₃ 20 г/л","OLA: 1.1 → 5.8 мг/л"]],
+   tags:["pH","two-stage","CaCO3","THCAS","OAC","critical"]},
+
+  {id:"MED-004", label:"Температура", type:"MED", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Обзор",
+   detail:"28°C оптимум для Y. lipolytica — баланс роста и экспрессии гетерологичных генов. 30°C снижает стабильность THCAS. 25°C — медленный рост, но лучший фолдинг.",
+   quant:[["Рост оптимум","28–30°C"],["THCAS стабильность","↓ при >30°C"],["Компромисс","28°C (рост + THCAS)"]],
+   tags:["temperature","28C","thermal-stability","THCAS"]},
+
+  {id:"MED-005", label:"DO (кислород)", type:"MED", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["THCVA"], pathway:"PWY-0003",
+   source:"Обзор THCAS",
+   detail:"DO 30–50% — оптимум. THCAS требует O₂ как акцептор электронов. Избыток DO → окислительный стресс, ↓FAD. Недостаток → THCAS не работает.",
+   quant:[["Оптимум","30–50% DO"],["THCAS","Требует O₂"],["Избыток DO",">80%: окислит. стресс"]],
+   tags:["DO","dissolved-oxygen","O2","THCAS","aerobic"]},
+
+  {id:"MED-006", label:"C/N fed-batch", type:"MED", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Обзор Y.lipolytica метаболизм",
+   detail:"C/N соотношение 80:1 → переключение на вторичный метаболизм. Fed-batch глюкозы + импульсные добавки пропионата. Ограничение N → ↑поликетидный синтез.",
+   quant:[["C/N оптимум","80:1 для вторич. метаб."],["N источник","(NH₄)₂SO₄ или мочевина"],["Стратегия","Fed-batch"]],
+   tags:["C/N","fed-batch","nitrogen-limitation","strategy"]},
+
+  // STR / ORG
+  {id:"STR-001", label:"STR-001 (DVA)", type:"STR", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
+   source:"Ma 2022 / Концепция",
+   detail:"Штамм 1 Y. lipolytica — продуцент DVA. Po1f/po1fk + OLS+OAC+ACC1. Секретирует DVA в среду → передаётся STR-002 в двухштаммовой системе.",
+   quant:[["Базовый шт.","po1f или po1fk"],["Конструкция","OLS+OAC+ACC1 (pYLXP')"],["Продукт","DVA → среда"]],
+   tags:["strain1","DVA-producer","po1fk","co-culture"]},
+
+  {id:"STR-002", label:"STR-002 (THCVA)", type:"STR", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["THCVA"], pathway:"PWY-0003",
+   source:"Концепция",
+   detail:"Штамм 2 Y. lipolytica — продуцент THCVA. Потребляет DVA из STR-001, добавляет CsPT4+MVA → CBGVA, затем THCAS → THCVA.",
+   quant:[["Прогноз","5–15 мг/л THCVA"],["Конструкция","CsPT4 + THCAS + MVA OE"],["Источник DVA","STR-001 (кондиционир. среда)"]],
+   tags:["strain2","THCVA-producer","co-culture","CsPT4","THCAS"]},
+
+  {id:"ORG-001", label:"S. cerevisiae", type:"ORG", confidence:"high",
+   organism:"s_cerevisiae", target:["general"], pathway:"general",
+   source:"Luo 2019",
+   detail:"Референс-хозяин для каннабиноидного пути. CBGA до 10 мг/л, THCA до 8 мг/л. Меньший пул ацетил-CoA vs Y. lipolytica.",
+   quant:[["CBGA max","~10 мг/л"],["THCA max","~8 мг/л"],["Недостаток","Малый ацетил-CoA пул"]],
+   tags:["S.cerevisiae","reference","CBGA","THCA"]},
+
+  {id:"ORG-002", label:"E. coli",        type:"ORG", confidence:"medium",
+   organism:"e_coli", target:["general"], pathway:"general",
+   source:"Обзор",
+   detail:"Быстрый рост, простая генетика. Трудности с мембранными ферментами (CsPT4, CYP450). Используется для части пути (поликетиды).",
+   quant:[["Рост","Быстрый, τ=20 мин"],["Проблема","Мембр. ферменты (CsPT4)"]],
+   tags:["E.coli","prokaryote","alternative"]},
+
+  {id:"ORG-003", label:"P. pastoris",    type:"ORG", confidence:"medium",
+   organism:"p_pastoris", target:["general"], pathway:"general",
+   source:"Обзор",
+   detail:"Метанол-индуцируемые промоторы (AOX1). Хорош для мембранных ферментов и белков с дисульфидами. Секреторная система развита.",
+   quant:[["Промотор","AOX1 (MeOH-индуц.)"],["Преимущество","Мембр. белки, секреция"]],
+   tags:["Pichia","methanol","CYP450","secretion"]},
+
+  {id:"ORG-004", label:"R. toruloides",  type:"ORG", confidence:"medium",
+   organism:"general", target:["general"], pathway:"general",
+   source:"Обзор олеагинных дрожжей",
+   detail:"Олеагинные дрожжи. Крупный пул ацетил-CoA и NADPH. Менее разработанные генетические инструменты vs Y. lipolytica.",
+   quant:[["Липидный пул","До 70% биомассы"],["Инструменты","Менее развиты"]],
+   tags:["Rhodotorula","oleaginous","acetyl-CoA","NADPH"]},
+
+  {id:"TER-squalene", label:"TER: Sквален", type:"TER", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["squalene"], pathway:"PWY-0004",
+   source:"Liu 2024 DOI: 10.1016/j.biortech.2023.130233",
+   detail:"Референс MVA-инженерии в Y. lipolytica. YLSQ9: 1628 мг/л сквалена после оптимизации ферментации. Показывает потенциал MVA + Y.lipolytica.",
+   quant:[["YLSQ9 флакон","868 мг/л"],["YLSQ9 оптим.","1628 мг/л"],["Ключ","HMG-CoAR OE + NADPH"]],
+   tags:["squalene","MVA","Y.lipolytica","titer","reference"]},
+
+  {id:"PRO-001", label:"PRO-001", type:"PRO", confidence:"medium",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Ma 2022 / Обзор",
+   detail:"Параметры процесса: DO 30–50%, pH 5.0–6.0, T 28°C, fed-batch глюкоза + пропионат импульсно. Двухфазная стратегия (рост → продукция).",
+   quant:[["DO","30–50%"],["pH","5.0–6.0"],["T","28°C"],["Стратегия","Fed-batch двухфазный"]],
+   tags:["bioreactor","fed-batch","DO","pH","scale-up"]},
+
+  {id:"PLS-001", label:"pYLXP'", type:"PLS", confidence:"high",
+   organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
+   source:"Ma 2022",
+   detail:"Базовый вектор для Y. lipolytica. TEF1/XPR2 регуляторные элементы. Интегративный или эписомальный. Используется для всех генов пути (OLS, OAC, ACC1...).",
+   quant:[["Тип","Shuttle vector Yl/E.coli"],["Промотор","TEF1 (с интроном)"],["Терминатор","XPR2"]],
+   tags:["pYLXP","vector","TEF1","XPR2","Ma2022"]},
+];
+
+const links = [
+  {s:"propionyl-CoA",t:"ENZ-OLS",  lbl:"стартовая единица", w:3},
+  {s:"malonyl-CoA",  t:"ENZ-OLS",  lbl:"×3 удлинитель",     w:3},
+  {s:"ENZ-OLS",      t:"ENZ-OAC",  lbl:"→ тетракетид",      w:3},
+  {s:"ENZ-OAC",      t:"DVA",      lbl:"циклизация",        w:3},
+  {s:"DVA",          t:"ENZ-CsPT4",lbl:"субстрат",          w:3},
+  {s:"GPP",          t:"ENZ-CsPT4",lbl:"пренильный донор",  w:3},
+  {s:"ENZ-CsPT4",    t:"CBGVA",    lbl:"→ CBGVA",           w:3},
+  {s:"CBGVA",        t:"ENZ-THCS", lbl:"субстрат",          w:3},
+  {s:"ENZ-THCS",     t:"THCVA",    lbl:"→ THCVA (FAD+O₂)", w:3},
+  {s:"acetyl-CoA",   t:"ENZ-ACC1", lbl:"субстрат",          w:2},
+  {s:"ENZ-ACC1",     t:"malonyl-CoA",lbl:"карбоксилирует",  w:2},
+  {s:"ENZ-ERG20",    t:"GPP",      lbl:"→ GPP",             w:2},
+  {s:"OLA",          t:"ENZ-CsPT4",lbl:"C5-аналог DVA",     w:1},
+  {s:"PWY-0001",t:"DVA",    lbl:"производит",w:1},
+  {s:"PWY-0002",t:"CBGVA",  lbl:"производит",w:1},
+  {s:"PWY-0003",t:"THCVA",  lbl:"производит",w:1},
+  {s:"PWY-0004",t:"GPP",    lbl:"производит",w:1},
+  {s:"PWY-0001",t:"ENZ-OLS",lbl:"использует",w:1},
+  {s:"PWY-0001",t:"ENZ-OAC",lbl:"использует",w:1},
+  {s:"PWY-0002",t:"ENZ-CsPT4",lbl:"использует",w:1},
+  {s:"PWY-0003",t:"ENZ-THCS",lbl:"использует",w:1},
+  {s:"PWY-0004",t:"ENZ-ERG20",lbl:"использует",w:1},
+  {s:"GEN-001",    t:"ENZ-OLS",      lbl:"экспрессирует",w:2},
+  {s:"GEN-001",    t:"ENZ-OAC",      lbl:"экспрессирует",w:2},
+  {s:"GEN-001",    t:"ENZ-CsPT4",    lbl:"экспрессирует",w:2},
+  {s:"GEN-002",    t:"ENZ-ACC1",     lbl:"OE",            w:2},
+  {s:"GEN-003",    t:"ENZ-ERG20",    lbl:"усиливает",     w:2},
+  {s:"GEN-004",    t:"propionyl-CoA",lbl:"снабжение",     w:2},
+  {s:"GEN-ACC1-OE",t:"ENZ-ACC1",     lbl:"OE ylACC1",    w:2},
+  {s:"GEN-OAC-YL", t:"ENZ-OAC",      lbl:"в Yl",          w:2},
+  {s:"GEN-THCS-YL",t:"ENZ-THCS",     lbl:"в Yl",          w:2},
+  {s:"GEN-PCS-YL", t:"propionyl-CoA",lbl:"→ CoA",          w:2},
+  {s:"GEN-MVA-YL", t:"ENZ-ERG20",    lbl:"усиливает",     w:2},
+  {s:"GEN-TEF1",   t:"GEN-001",      lbl:"промотор",      w:1},
+  {s:"GEN-hp4d",   t:"GEN-001",      lbl:"промотор",      w:1},
+  {s:"GEN-PTS1",   t:"ENZ-OLS",      lbl:"локализует",    w:1},
+  {s:"GEN-CODON",  t:"ENZ-OLS",      lbl:"оптимизирует",  w:1},
+  {s:"GEN-CODON",  t:"ENZ-THCS",     lbl:"оптимизирует",  w:1},
+  {s:"PLS-001",    t:"GEN-001",      lbl:"вектор для",    w:1},
+  {s:"ADD-biotin",    t:"ENZ-ACC1",      lbl:"кофактор",   w:2},
+  {s:"ADD-FAD",       t:"ENZ-THCS",      lbl:"кофактор",   w:2},
+  {s:"ADD-Mg",        t:"ENZ-OAC",       lbl:"кофактор",   w:2},
+  {s:"ADD-Mg",        t:"ENZ-ACC1",      lbl:"кофактор",   w:1},
+  {s:"ADD-Mg",        t:"ENZ-ERG20",     lbl:"кофактор",   w:1},
+  {s:"ADD-Mn",        t:"ENZ-OAC",       lbl:"альт. кофакт",w:1},
+  {s:"ADD-NADPH",     t:"ENZ-THCS",      lbl:"регенер. FAD",w:2},
+  {s:"ADD-Fe",        t:"ENZ-CsPT4",     lbl:"кофактор",   w:1},
+  {s:"ADD-pantothen", t:"propionyl-CoA", lbl:"CoA ← B5",   w:1},
+  {s:"ADD-pantothen", t:"malonyl-CoA",   lbl:"CoA ← B5",   w:1},
+  {s:"ADD-pantothen", t:"acetyl-CoA",    lbl:"CoA ← B5",   w:1},
+  {s:"ADD-biotin",    t:"acetyl-CoA",    lbl:"ACC1 активен",w:1},
+  {s:"ADD-propionate",t:"propionyl-CoA", lbl:"→ CoA",       w:2},
+  {s:"ADD-malonate",  t:"malonyl-CoA",   lbl:"→ CoA",       w:2},
+  {s:"ADD-cerulenin", t:"malonyl-CoA",   lbl:"FAS↓ → ↑пул",w:2},
+  {s:"ADD-glycerol",  t:"acetyl-CoA",    lbl:"C-источник",  w:1},
+  {s:"ADD-hexanoate", t:"OLA",           lbl:"→ гексаноил", w:1},
+  {s:"ADD-butyrate",  t:"propionyl-CoA", lbl:"аналог",      w:1},
+  {s:"ADD-acetyl-sc", t:"acetyl-CoA",    lbl:"шорткат",     w:1},
+  {s:"ADD-amino",     t:"malonyl-CoA",   lbl:"→ малонил",   w:1},
+  {s:"ADD-CaCO3",     t:"MED-003",       lbl:"буфер pH",    w:2},
+  {s:"ADD-NaCl",      t:"acetyl-CoA",    lbl:"перенаправл.",w:1},
+  {s:"ADD-erythritol",t:"acetyl-CoA",    lbl:"перенаправл.",w:1},
+  {s:"ADD-MeJA",      t:"GEN-001",       lbl:"элицитор",    w:1},
+  {s:"MED-003",t:"ENZ-THCS",    lbl:"pH 4.5–5.5",   w:2},
+  {s:"MED-003",t:"ENZ-OAC",     lbl:"pH 5.5–6.0",   w:2},
+  {s:"MED-004",t:"ENZ-THCS",    lbl:"28–30°C",       w:1},
+  {s:"MED-005",t:"ENZ-THCS",    lbl:"O₂ обязателен",w:2},
+  {s:"MED-006",t:"acetyl-CoA",  lbl:"C/N поток",     w:1},
+  {s:"MED-001",t:"STR-001",     lbl:"среда для",     w:1},
+  {s:"PRO-001",t:"STR-001",     lbl:"процесс",       w:1},
+  {s:"PRO-001",t:"STR-002",     lbl:"процесс",       w:1},
+  {s:"STR-001",t:"DVA",         lbl:"производит",    w:2},
+  {s:"STR-002",t:"THCVA",       lbl:"производит",    w:2},
+  {s:"STR-001",t:"STR-002",     lbl:"DVA → среда",   w:2},
+  {s:"ORG-001",t:"GEN-001",     lbl:"аналог пути",   w:1},
+  {s:"LIT-ma2021",  t:"ENZ-OLS",     lbl:"83× OLA",     w:1},
+  {s:"LIT-ma2021",  t:"GEN-001",     lbl:"описывает",   w:1},
+  {s:"LIT-hong2025",t:"STR-002",     lbl:"платформа",   w:1},
+  {s:"LIT-hong2025",t:"ENZ-THCS",   lbl:"конденсаты",  w:1},
+  {s:"LIT-qi2026",  t:"ENZ-ACC1",   lbl:"CoA динамика",w:1},
+  {s:"LIT-qi2026",  t:"malonyl-CoA",lbl:"динамика",    w:1},
+  {s:"TER-squalene",t:"ENZ-ERG20",  lbl:"использует MVA",w:1},
+];
+
+// ══════════════════════════════════════════════════════════════════════════════
+// D3 GRAPH
+// ══════════════════════════════════════════════════════════════════════════════
+const W = window.innerWidth, H = window.innerHeight;
+const svg = d3.select("#graph").attr("viewBox", `0 0 ${W} ${H}`);
+const g = svg.append("g");
+
+const zoom = d3.zoom().scaleExtent([0.08, 5]).on("zoom", e => {
+  g.attr("transform", e.transform);
+  document.getElementById("zoom-info").textContent = `${e.transform.k.toFixed(2)}×`;
+});
+svg.call(zoom);
+
+const nodeMap = new Map(nodes.map(n => [n.id, n]));
+const processedLinks = links.map(l => ({source:l.s, target:l.t, label:l.lbl, weight:l.w||1}))
+  .filter(l => nodeMap.has(l.source) && nodeMap.has(l.target));
+
+const sim = d3.forceSimulation(nodes)
+  .force("link", d3.forceLink(processedLinks).id(d=>d.id).distance(d=>130-d.weight*18).strength(0.5))
+  .force("charge", d3.forceManyBody().strength(-280))
+  .force("center", d3.forceCenter(W/2, H/2))
+  .force("collision", d3.forceCollide(d=>TYPES[d.type].r+8));
+
+const linkG = g.append("g");
+const linkSel = linkG.selectAll("line").data(processedLinks).enter().append("line")
+  .attr("class","link")
+  .attr("stroke", d => { const t=nodeMap.get(d.target.id||d.target); return t?TYPES[t.type]?.color+"80":"#33415580"; })
+  .attr("stroke-width", d=>d.weight);
+
+const nodeG = g.append("g");
+const nodeSel = nodeG.selectAll(".node").data(nodes).enter().append("g")
+  .attr("class","node")
+  .call(d3.drag()
+    .on("start",(e,d)=>{if(!e.active)sim.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y;})
+    .on("drag", (e,d)=>{d.fx=e.x;d.fy=e.y;})
+    .on("end",  (e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;})
+  )
+  .on("click",(e,d)=>{ if(e.ctrlKey||e.metaKey){e.preventDefault();toggleSelect(d);}else{showNodePanel(d);} });
+
+nodeSel.append("circle")
+  .attr("r", d=>TYPES[d.type].r)
+  .attr("fill", d=>TYPES[d.type].color+"25")
+  .attr("stroke", d=>TYPES[d.type].color);
+
+nodeSel.append("text").attr("text-anchor","middle")
+  .attr("dy", d=>TYPES[d.type].r+11).text(d=>d.label);
+
+sim.on("tick",()=>{
+  linkSel.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y)
+         .attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+  nodeSel.attr("transform",d=>`translate(${d.x},${d.y})`);
+});
+
+// ── Legend ──
+const legend = document.getElementById("legend");
+legend.innerHTML = '<div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:5px;">Типы</div>';
+Object.entries(TYPES).forEach(([k,v])=>{
+  legend.innerHTML += `<div class="legend-item" onclick="toggleType('${k}')">
+    <div class="legend-dot" style="background:${v.color}"></div><span>${v.label}</span></div>`;
+});
+
+// ── Filter buttons ──
+const hiddenTypes = new Set();
+const btnCont = document.getElementById("filter-btns");
+Object.entries(TYPES).forEach(([k,v])=>{
+  const b = document.createElement("button");
+  b.className="filter-btn active"; b.style.borderColor=v.color; b.style.color=v.color;
+  b.textContent=k; b.dataset.type=k;
+  b.onclick=()=>toggleType(k,b);
+  btnCont.appendChild(b);
+});
+function toggleType(k,btn){
+  if(!btn) btn=document.querySelector(`[data-type="${k}"]`);
+  hiddenTypes.has(k)?hiddenTypes.delete(k):hiddenTypes.add(k);
+  btn.classList.toggle("inactive",hiddenTypes.has(k));
+  applyDim();
+}
+function applyDim(){
+  nodeSel.classed("dimmed",d=>hiddenTypes.has(d.type));
+  linkSel.style("opacity",d=>{
+    const st=nodeMap.get(d.source.id||d.source)?.type;
+    const tt=nodeMap.get(d.target.id||d.target)?.type;
+    return(hiddenTypes.has(st)||hiddenTypes.has(tt))?0.02:null;
+  });
+}
+
+// ── Search ──
+document.getElementById("search").addEventListener("input",e=>{
+  const q=e.target.value.toLowerCase().trim();
+  nodeSel.classed("searched",d=>q.length>1&&(
+    d.label.toLowerCase().includes(q)||d.id.toLowerCase().includes(q)||
+    d.tags.some(t=>t.toLowerCase().includes(q))||d.detail.toLowerCase().includes(q)
+  ));
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MULTI-SELECT (Ctrl+Click)
+// ══════════════════════════════════════════════════════════════════════════════
+const selectedIds = new Set();
+
+function toggleSelect(d){
+  selectedIds.has(d.id)?selectedIds.delete(d.id):selectedIds.add(d.id);
+  updateSelection();
+}
+function clearSelection(){
+  selectedIds.clear();
+  updateSelection();
+  closePanel("cmp");
+}
+function updateSelection(){
+  nodeSel.classed("selected",n=>selectedIds.has(n.id));
+  nodeSel.classed("dimmed",n=>hiddenTypes.has(n.type)&&!selectedIds.has(n.id));
+
+  // Highlight links between selected nodes
+  linkSel.classed("sel-link",l=>{
+    const sid=l.source.id||l.source, tid=l.target.id||l.target;
+    return selectedIds.has(sid)&&selectedIds.has(tid);
+  });
+
+  const tray = document.getElementById("sel-tray");
+  if(selectedIds.size===0){
+    tray.style.display="none";
+    applyDim();
+    return;
+  }
+  tray.style.display="flex";
+  document.getElementById("sel-count").textContent=selectedIds.size;
+
+  const chips = document.getElementById("sel-chips");
+  chips.innerHTML=[...selectedIds].map(id=>{
+    const n=nodeMap.get(id); if(!n)return"";
+    const c=TYPES[n.type]?.color||"#475569";
+    return `<span class="sel-chip" style="background:${c}30;color:${c};border:1px solid ${c}"
+      onclick="toggleSelect(nodeMap.get('${id}'))">${n.label} ×</span>`;
+  }).join("");
+}
+
+function openCompare(){
+  if(selectedIds.size===0) return;
+  const sel=[...selectedIds].map(id=>nodeMap.get(id)).filter(Boolean);
+  document.getElementById("cmp-title").textContent=`Сравнение (${sel.length})`;
+  document.getElementById("cmp-body").classList.remove("collapsed");
+  document.getElementById("cmp-col-btn").textContent="▾";
+
+  // Inner links between selected nodes
+  const innerLinks = processedLinks.filter(l=>{
+    const sid=l.source.id||l.source, tid=l.target.id||l.target;
+    return selectedIds.has(sid)&&selectedIds.has(tid);
+  });
+
+  const selSet = new Set(sel.map(n=>n.id));
+
+  document.getElementById("cmp-body").innerHTML=`
+    ${innerLinks.length?`<div style="font-size:10px;font-weight:700;color:#3b82f6;margin-bottom:8px;">
+      Связи между выбранными (${innerLinks.length}):</div>
+      ${innerLinks.map(l=>{
+        const sid=l.source.id||l.source, tid=l.target.id||l.target;
+        const sn=nodeMap.get(sid), tn=nodeMap.get(tid);
+        return `<div style="font-size:11px;padding:3px 0;border-bottom:1px solid #1e293b;color:#94a3b8">
+          <span style="color:${TYPES[sn?.type]?.color}">${sn?.label||sid}</span>
+          <span style="color:#475569"> → [${l.label}] → </span>
+          <span style="color:${TYPES[tn?.type]?.color}">${tn?.label||tid}</span>
+        </div>`;}).join("")}
+      <div style="margin-bottom:10px"></div>`:""}
+    <div class="cmp-cards">
+      ${sel.map(n=>{
+        const T=TYPES[n.type]; const C=T?.color||"#475569";
+        const connCount=processedLinks.filter(l=>{
+          const sid=l.source.id||l.source,tid=l.target.id||l.target;
+          return sid===n.id||tid===n.id;
+        }).length;
+        return `<div class="cmp-card" style="border-color:${C}40">
+          <div class="cmp-card-title" style="color:${C}">[${n.type}] ${n.label}</div>
+          <div style="font-size:10px;color:#475569;margin-bottom:4px;">
+            organism: ${n.organism||"—"} · confidence: ${n.confidence||"—"} · связей: ${connCount}
+          </div>
+          <div class="cmp-card-desc">${n.detail}</div>
+          ${n.quant&&n.quant.length?`<div style="margin-top:6px">`+n.quant.map(q=>
+            `<div style="font-size:10px;color:#64748b"><b style="color:#94a3b8">${q[0]}:</b> ${q[1]}</div>`).join("")+`</div>`:""
+          }
+          <div style="margin-top:5px">${n.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+        </div>`;
+      }).join("")}
+    </div>`;
+  document.getElementById("cmp-panel").style.display="block";
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PANELS
+// ══════════════════════════════════════════════════════════════════════════════
+function togglePanel(name){
+  const body=document.getElementById(name+"-body");
+  const btn=document.getElementById(name+"-col-btn");
+  const c=body.classList.toggle("collapsed");
+  btn.textContent=c?"▸":"▾";
+}
+function closePanel(name){
+  document.getElementById(name+"-panel").style.display="none";
+  if(name==="node"){applyDim();nodeSel.classed("highlighted",false);}
+}
+
+// Draggable
+["node","conn","cmp"].forEach(name=>{
+  const panel=document.getElementById(name+"-panel");
+  const header=document.getElementById(name+"-hdr");
+  let ox=0,oy=0,sx=0,sy=0;
+  header.addEventListener("mousedown",e=>{
+    if(e.target.classList.contains("panel-btn"))return;
+    e.preventDefault();
+    const r=panel.getBoundingClientRect();
+    sx=e.clientX;sy=e.clientY;ox=r.left;oy=r.top;
+    panel.style.left=ox+"px";panel.style.top=oy+"px";
+    panel.style.bottom="auto";panel.style.right="auto";
+    const mv=ev=>{panel.style.left=(ox+ev.clientX-sx)+"px";panel.style.top=(oy+ev.clientY-sy)+"px";};
+    const up=()=>{document.removeEventListener("mousemove",mv);document.removeEventListener("mouseup",up);};
+    document.addEventListener("mousemove",mv);document.addEventListener("mouseup",up);
+  });
+});
+
+// ── Confidence bar ──
+function confBar(c){
+  const map={high:3,medium:2,low:1};
+  const n=map[c]||0;
+  const colors={high:"#22c55e",medium:"#eab308",low:"#ef4444"};
+  const col=colors[c]||"#475569";
+  return `<span class="conf-bar">${[1,2,3].map(i=>`<span class="conf-pip" style="background:${i<=n?col:"#1e293b"}"></span>`).join("")}</span> <span style="font-size:10px;color:${col}">${c||"—"}</span>`;
+}
+
+// ── Node panel ──
+function showNodePanel(d){
+  const T=TYPES[d.type]; const C=T?.color||"#64748b";
+  document.getElementById("node-title").textContent=d.label;
+  document.getElementById("node-title").style.color=C;
+  document.getElementById("node-body").classList.remove("collapsed");
+  document.getElementById("node-col-btn").textContent="▾";
+
+  const connected=processedLinks.filter(l=>{
+    const sid=l.source.id||l.source,tid=l.target.id||l.target;
+    return sid===d.id||tid===d.id;
+  });
+
+  document.getElementById("node-body").innerHTML=`
+    <span class="card-badge" style="background:${C}20;color:${C};border:1px solid ${C}">${d.type}</span>
+    <p class="card-desc">${d.detail}</p>
+    <div class="card-meta">
+      <span class="card-meta-k">Organism</span>
+      <span class="card-meta-v">${(d.organism||"—").replace(/_/g," ")}</span>
+      <span class="card-meta-k">Target</span>
+      <span class="card-meta-v">${(d.target||[]).join(", ")||"—"}</span>
+      <span class="card-meta-k">Pathway</span>
+      <span class="card-meta-v">${d.pathway||"—"}</span>
+      <span class="card-meta-k">Confidence</span>
+      <span class="card-meta-v">${confBar(d.confidence)}</span>
+      <span class="card-meta-k">Source</span>
+      <span class="card-meta-v" style="font-size:10px;color:#475569">${d.source||"—"}</span>
+    </div>
+    ${d.quant&&d.quant.length?`<div class="quant-block">
+      ${d.quant.map(q=>`<div class="quant-row"><span class="quant-k">${q[0]}:</span><span class="quant-v">${q[1]}</span></div>`).join("")}
+    </div>`:""}
+    <div class="tag-strip">${d.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+    ${connected.length?`<div class="sec-hdr">Связи (${connected.length})</div>
+      ${connected.map(l=>{
+        const sid=l.source.id||l.source,tid=l.target.id||l.target;
+        const isOut=sid===d.id;
+        const other=isOut?tid:sid;
+        const on=nodeMap.get(other);
+        const oc=on?TYPES[on.type]?.color:"#475569";
+        return `<div class="rel-row" onclick="showConnPanel('${sid}','${tid}','${l.label.replace(/'/g,"\\'")}')">
+          <span class="rel-dir" style="color:${oc}">${isOut?"→":"←"}</span>
+          <span class="rel-name" style="color:${oc}">${on?.label||other}</span>
+          <span class="rel-lbl">${l.label}</span>
+        </div>`;}).join("")}`:`<div style="font-size:11px;color:#334155;margin-top:6px">Нет связей</div>`}
+  `;
+  document.getElementById("node-panel").style.display="block";
+
+  // Highlight neighbours
+  const connIds=new Set([d.id]);
+  connected.forEach(l=>{connIds.add(l.source.id||l.source);connIds.add(l.target.id||l.target);});
+  nodeSel.classed("highlighted",n=>connIds.has(n.id));
+  nodeSel.classed("dimmed",n=>!connIds.has(n.id));
+}
+
+// ── Connection panel ──
+function showConnPanel(srcId,tgtId,lbl){
+  const src=nodeMap.get(srcId), tgt=nodeMap.get(tgtId);
+  document.getElementById("conn-body").classList.remove("collapsed");
+  document.getElementById("conn-col-btn").textContent="▾";
+
+  function nodeBlock(n,fallId){
+    if(!n) return `<div class="conn-node"><div class="conn-node-title">${fallId}</div></div>`;
+    const C=TYPES[n.type]?.color||"#64748b";
+    return `<div class="conn-node" style="border-color:${C}40">
+      <div class="conn-node-title" style="color:${C}">[${n.type}] ${n.label}</div>
+      <div class="conn-node-desc">${n.detail}</div>
+      ${n.quant&&n.quant.length?n.quant.map(q=>`<div style="font-size:10px;margin-top:3px;color:#64748b"><b style="color:#94a3b8">${q[0]}:</b> ${q[1]}</div>`).join(""):""}
+      <div style="margin-top:5px">${n.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+    </div>`;
+  }
+
+  document.getElementById("conn-body").innerHTML=`
+    ${nodeBlock(src,srcId)}
+    <div class="conn-arrow">↓</div>
+    <div class="conn-lbl">${lbl}</div>
+    ${nodeBlock(tgt,tgtId)}
+  `;
+  document.getElementById("conn-panel").style.display="block";
+}
+</script>
+</body>
+</html>

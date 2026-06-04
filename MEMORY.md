@@ -1,0 +1,15 @@
+- [Interaction matrix created](interaction-matrix-created.md) — Created interaction matrix for genetic modifications in Y. lipolytica cannabinoid pathway
+- [Cannabinoid optimization update](cannabinoid-optimization-update.md) — Summary of research updates for cannabinoid production optimization in Y. lipolytica
+- [MVA pathway enhancement](mva-pathway-enhancement.md) — Created GEN-MVA-YL-001 card for mevalonate pathway enhancement to boost IPP/DMAPP pools for cannabinoid prenylation
+- [Ketoyl-CoA thiolase engineering](ketoyl-coa-thiolase.md) — Created GEN-KET-YL-001 card for ketoyl-CoA thiolase engineering to control polyketide chain length in cannabinoid biosynthesis
+- [Verified magnesium effect](verified-magnesium-effect.md) — Added experimentally verified magnesium effect data showing ~2.09× titer increase when MgSO4 omitted from YNB-free medium
+- [Nutrient feeding strategies](nutrient-feeding-strategies.md) — Summary of nutrient feeding strategies and C/N ratio effects on cannabinoid biosynthesis in Y. lipolytica
+- [TEF1 promoter added to enzyme cards](gen-tef1-yl-001-promoter-added-to-enzyme-cards.md) — Added GEN-TEf1-YL-001 reference to ENZ-OAC.md and updated related_cards array
+- [hp4d promoter added to enzyme cards](gen-hp4d-yl-001-promoter-added-to-enzyme-cards.md) — Added GEN-hp4d-YL-001 reference to all enzyme kinetics cards
+- [Codon optimization card created](codon-optimization-card-created.md) — Created GEN-CODON-OPT-YL-001 for expression enhancement strategies
+- [PTS1 targeting signal card created](pts1-targeting-signal-card-created.md) — Created GEN-PTS1-YL-001 for peroxisomal compartmentalization strategy
+- [POX2 promoter card created](pox2-promoter-card-created.md) — Created GEN-POX2-YL-001 for methanol-inducible promoter system in Y. lipolytica
+- [Carotenoid titer data](carotenoid-titer-yarrowia.md) — Carotenoid production titers in Yarrowia lipolytica as pathway indicators for cannabinoid biosynthesis
+- [THCVA titer data](thcva-titer-yarrowia.md) — Known THCVA and DVA titers, yields, and precursor data from Yarrowia lipolytica fermentations
+- [Cobalt additive for carotenoids](ADD-cobalt-carotenoid.md) — Cobalt as an additive to enhance carotenoid production and indirectly support cannabinoid precursor supply in Y. lipolytica
+- [Acetic acid stepwise feeding](ADD-acetic-acid-stepwise-fedbatch.md) — Stepwise acetic acid feeding strategy in fed-batch for lipid/acetyl-CoA enhancement in Y. lipolytica
