@@ -197,6 +197,27 @@ svg { width: 100vw; height: 100vh; }
 .node.highlighted circle { stroke-width: 3.5; filter: drop-shadow(0 0 6px currentColor) brightness(1.35); }
 .node.selected circle { stroke-width: 3.5; filter: drop-shadow(0 0 8px currentColor); }
 .node.searched circle { stroke-width: 4; filter: brightness(1.5); }
+
+/* ── Auto-expand toggle ── */
+.toggle-wrap {
+  display:flex; align-items:center; gap:6px;
+  margin-left:auto; flex-shrink:0; cursor:pointer;
+}
+.toggle-label { font-size:10px; color:#475569; white-space:nowrap; user-select:none; }
+.toggle-wrap:hover .toggle-label { color:#94a3b8; }
+.toggle-switch { position:relative; width:30px; height:17px; flex-shrink:0; }
+.toggle-switch input { opacity:0; width:0; height:0; position:absolute; }
+.toggle-slider {
+  position:absolute; inset:0; background:#1e293b; border:1px solid #334155;
+  border-radius:9px; cursor:pointer; transition:background .2s, border-color .2s;
+}
+.toggle-slider::before {
+  content:""; position:absolute; width:13px; height:13px;
+  left:1px; top:1px; background:#475569; border-radius:50%;
+  transition:transform .2s, background .2s;
+}
+.toggle-switch input:checked + .toggle-slider { background:#1e3a5f; border-color:#3b82f6; }
+.toggle-switch input:checked + .toggle-slider::before { transform:translateX(13px); background:#60a5fa; }
 </style>
 </head>
 <body>
@@ -208,6 +229,13 @@ svg { width: 100vw; height: 100vh; }
   <input type="text" id="search" placeholder="Поиск...">
   <div class="sep"></div>
   <span id="hint">Клик = карточка · Ctrl+Клик = выделение · Scroll = зум</span>
+  <label class="toggle-wrap" title="Автоматически раскрывать все секции карточки">
+    <span class="toggle-label">Раскрыть всё</span>
+    <div class="toggle-switch">
+      <input type="checkbox" id="auto-expand-toggle" checked>
+      <span class="toggle-slider"></span>
+    </div>
+  </label>
 </div>
 
 <div id="sel-tray">
@@ -1160,6 +1188,12 @@ function confBar(c){
   return `<span class="conf-bar">${[1,2,3].map(i=>`<span class="conf-pip" style="background:${i<=n?col:"#1e293b"}"></span>`).join("")}</span> <span style="font-size:10px;color:${col}">${c||"—"}</span>`;
 }
 
+// ── Auto-expand global state ──
+let autoExpand = true;
+document.getElementById("auto-expand-toggle").addEventListener("change", e => {
+  autoExpand = e.target.checked;
+});
+
 // ── Expand/collapse extra sections ──
 function toggleExtra(extraId, btn) {
   const el = document.getElementById(extraId);
@@ -1167,6 +1201,22 @@ function toggleExtra(extraId, btn) {
   el.classList.toggle("open", opening);
   btn.classList.toggle("open", opening);
   btn.querySelector(".eb-arrow").textContent = opening ? "▲" : "▼";
+}
+
+// ── Apply auto-expand to all sections inside a container ──
+function applyAutoExpand(containerId) {
+  if (!autoExpand) return;
+  document.querySelectorAll(`#${containerId} .extra-section`).forEach(el => {
+    el.classList.add("open");
+    // Walk backwards to find the preceding .expand-btn
+    let prev = el.previousElementSibling;
+    while (prev && !prev.classList.contains("expand-btn")) prev = prev.previousElementSibling;
+    if (prev) {
+      prev.classList.add("open");
+      const arrow = prev.querySelector(".eb-arrow");
+      if (arrow) arrow.textContent = "▲";
+    }
+  });
 }
 
 // ── Build hints list for expand button ──
@@ -1281,6 +1331,7 @@ function showNodePanel(d){
         </div>`;}).join("")}`:`<div style="font-size:11px;color:#334155;margin-top:6px">Нет связей</div>`}
   `;
   document.getElementById("node-panel").style.display="block";
+  applyAutoExpand("node-body");
 
   // Highlight neighbours
   const connIds=new Set([d.id]);
@@ -1344,6 +1395,7 @@ function showConnPanel(srcId,tgtId,lbl){
     ${nodeBlock(tgt,tgtId,"t")}
   `;
   document.getElementById("conn-panel").style.display="block";
+  applyAutoExpand("conn-body");
 }
 </script>
 </body>
