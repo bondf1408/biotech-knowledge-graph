@@ -10,7 +10,7 @@ source_pmid: 382640097
 confidence: medium
 date_added: 2026-06-05
 last_updated: 2026-06-05
-related_cards: [ENZ-ACC1, GEN-002, GEN-003, GEN-004, ADD-glucose-pulse-fedbatch, ADD-ma-2020-biorefinery, MED-007]
+related_cards: [ENZ-ACC1, GEN-002, GEN-003, GEN-004, ADD-glucose-pulse-fedbatch, ADD-ma-2020-biorefinery, MED-007, ADD-two-stage-propionate-glycol-fedbatch]
 ---
 
 # Многофазная подача глицерина как стратегия fed-batch культивации для Yarrowia lipolytica

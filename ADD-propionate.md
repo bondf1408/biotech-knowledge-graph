@@ -10,7 +10,7 @@ source_pmid:
 confidence: medium
 date_added: 2026-06-02
 last_updated: 2026-06-02
-related_cards: [GEN-PCS-YL-001, GEN-001, GEN-002, GEN-OAC-YL-001, GEN-THCS-YL-001, CMP-003, PWY-0001, PWY-0002]
+related_cards: [GEN-PCS-YL-001, GEN-001, GEN-002, GEN-OAC-YL-001, GEN-THCS-YL-001, CMP-003, PWY-0001, PWY-0002, ADD-two-stage-propionate-glycol-fedbatch]
 ---
 
 # Пропионат как предшественник пропионил-CoA для синтеза дивариновой кислоты (DVA)
