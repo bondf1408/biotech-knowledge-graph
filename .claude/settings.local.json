@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pdftotext -h)",
+      "Bash(pdftotext -f 1 -l 5 \"A:\\\\job\\\\biotech\\\\Ma2022_MOESM2_ESM.pdf\" \"A:\\\\job\\\\biotech\\\\extracted.txt\")",
+      "Bash(pdftotext -f 6 -l 10 \"A:\\\\job\\\\biotech\\\\Ma2022_MOESM2_ESM.pdf\" \"A:\\\\job\\\\biotech\\\\extracted2.txt\")",
+      "WebSearch"
+    ]
+  }
+}

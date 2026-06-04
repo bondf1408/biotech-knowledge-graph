@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.brenda-enzymes.info)",
+      "Bash(pdftotext -f 11 -l 20 \"A:\\\\job\\\\biotech\\\\Ma2022_MOESM2_ESM.pdf\" \"A:\\\\job\\\\biotech\\\\extracted3.txt\")",
+      "Skill(deep-research)",
+      "Skill(deep-research:*)",
+      "WebFetch(domain:www.brenda-enzymes.org)",
+      "WebFetch(domain:www.uniprot.org)",
+      "WebFetch(domain:www.pnas.org)",
+      "WebFetch(domain:link.springer.com)",
+      "WebFetch(domain:idp.springer.com)",
+      "WebFetch(domain:www.biorxiv.org)",
+      "WebFetch(domain:pdf.benchchem.com)",
+      "WebFetch(domain:pmc.ncbi.nlm.nih.gov)",
+      "WebFetch(domain:scidok.sulb.uni-saarland.de)",
+      "WebFetch(domain:impact.ornl.gov)",
+      "WebFetch(domain:www.sciencedirect.com)"
+    ]
+  }
+}

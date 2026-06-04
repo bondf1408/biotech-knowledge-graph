@@ -1,0 +1,2 @@
+AscC: 12 mutations, 0 kinetics
+NphB: 43 mutations, 0 kinetics
