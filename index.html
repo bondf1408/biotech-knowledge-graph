@@ -123,6 +123,28 @@ body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; 
 .ref-link:last-child { border-bottom:none; }
 .ref-link:hover { background:#1e3a5f; color:#93c5fd; text-decoration:none; }
 .ref-icon { font-size:9px; opacity:.7; flex-shrink:0; }
+
+/* ── Expand button ── */
+.expand-btn {
+  width:100%; margin:6px 0 2px; padding:6px 10px;
+  background:#0f172a; border:1px solid #334155; border-radius:6px;
+  color:#64748b; font-size:10px; font-weight:700; cursor:pointer;
+  display:flex; align-items:center; justify-content:space-between; gap:6px;
+  transition:background .12s, border-color .12s, color .12s;
+  text-align:left;
+}
+.expand-btn:hover { background:#1e293b; border-color:#475569; color:#cbd5e1; }
+.expand-btn.open { background:#0c1a30; border-color:#3b82f6; color:#60a5fa; }
+.expand-btn .eb-arrow { font-size:11px; flex-shrink:0; transition:transform .2s; }
+.expand-btn.open .eb-arrow { transform:rotate(180deg); }
+.expand-btn .eb-hints { display:flex; gap:5px; flex-wrap:wrap; }
+.eb-hint { background:#1e293b; border-radius:3px; padding:1px 5px; font-size:9px; color:#475569; }
+.expand-btn.open .eb-hint { background:#1e3a5f; color:#93c5fd; }
+
+/* ── Extra section wrapper (collapsed by default) ── */
+.extra-section { display:none; }
+.extra-section.open { display:block; }
+
 .rel-row {
   display: flex; align-items: center; gap: 5px; padding: 4px 7px;
   border-radius: 6px; margin-bottom: 2px; cursor: pointer;
@@ -1138,6 +1160,26 @@ function confBar(c){
   return `<span class="conf-bar">${[1,2,3].map(i=>`<span class="conf-pip" style="background:${i<=n?col:"#1e293b"}"></span>`).join("")}</span> <span style="font-size:10px;color:${col}">${c||"—"}</span>`;
 }
 
+// ── Expand/collapse extra sections ──
+function toggleExtra(extraId, btn) {
+  const el = document.getElementById(extraId);
+  const opening = !el.classList.contains("open");
+  el.classList.toggle("open", opening);
+  btn.classList.toggle("open", opening);
+  btn.querySelector(".eb-arrow").textContent = opening ? "▲" : "▼";
+}
+
+// ── Build hints list for expand button ──
+function buildHints(d){
+  const h=[];
+  if(d.quant&&d.quant.length)   h.push({k:"quant",  t:`📊 Данные (${d.quant.length})`});
+  if(d.genotype)                 h.push({k:"geno",   t:"🧬 Генотип"});
+  if(d.notes)                    h.push({k:"notes",  t:"💡 Примеч."});
+  if(d.risks&&d.risks.length)    h.push({k:"risks",  t:`⚠ Риски (${d.risks.length})`});
+  if(d.refs&&d.refs.length)      h.push({k:"refs",   t:`📄 Источн. (${d.refs.length})`});
+  return h;
+}
+
 // ── Priority badge helper ──
 function priorityBadge(p){
   if(!p) return "";
@@ -1172,23 +1214,36 @@ function showNodePanel(d){
     return sid===d.id||tid===d.id;
   });
 
-  // Chemical formula row (for CMP/MET types)
+  // ── Always-visible section ──
   const chemRow = (d.formula||d.mw) ? `<div class="chem-row">
     ${d.formula?`<div class="chem-item"><span class="chem-k">Формула</span><span class="chem-v">${d.formula}</span></div>`:""}
     ${d.mw?`<div class="chem-item"><span class="chem-k">М.м.</span><span class="chem-v">${d.mw}</span></div>`:""}
   </div>` : "";
 
-  // Genotype block (for STR type)
+  // ── Expandable section ──
   const genotypeBlock = d.genotype ? `<div class="sec-hdr">🧬 Генотип / Конструкция</div>
     <div class="genotype-block">${d.genotype}</div>` : "";
-
-  // Notes block
   const notesBlock = d.notes ? `<div class="sec-hdr">💡 Примечания</div>
     <div class="notes-block">${d.notes}</div>` : "";
-
-  // Risks block
   const risksBlock = (d.risks&&d.risks.length) ? `<div class="sec-hdr">⚠ Риски / Узкие места</div>
     <div class="risk-block">${d.risks.map(r=>`<div class="risk-item">${r}</div>`).join("")}</div>` : "";
+  const quantBlock = d.quant&&d.quant.length ? `<div class="sec-hdr">📊 Количественные данные</div>
+    <div class="quant-block">${d.quant.map(q=>`<div class="quant-row"><span class="quant-k">${q[0]}:</span><span class="quant-v">${q[1]}</span></div>`).join("")}</div>` : "";
+
+  // ── Build expand button ──
+  const hints = buildHints(d);
+  const extraId = `nx-${d.id.replace(/[^a-zA-Z0-9]/g,"_")}`;
+  const hasExtra = hints.length > 0;
+  const expandBtn = hasExtra ? `
+    <button class="expand-btn" onclick="toggleExtra('${extraId}',this)">
+      <span class="eb-hints">${hints.map(h=>`<span class="eb-hint">${h.t}</span>`).join("")}</span>
+      <span class="eb-arrow">▼</span>
+    </button>` : "";
+
+  const extraSection = hasExtra ? `
+    <div class="extra-section" id="${extraId}">
+      ${quantBlock}${genotypeBlock}${notesBlock}${risksBlock}${refsHtml(d.refs)}
+    </div>` : "";
 
   document.getElementById("node-body").innerHTML=`
     <div style="margin-bottom:8px">
@@ -1209,14 +1264,9 @@ function showNodePanel(d){
       <span class="card-meta-k">Source</span>
       <span class="card-meta-v" style="font-size:10px;color:#64748b">${d.source||"—"}</span>
     </div>
-    ${d.quant&&d.quant.length?`<div class="sec-hdr">📊 Количественные данные</div><div class="quant-block">
-      ${d.quant.map(q=>`<div class="quant-row"><span class="quant-k">${q[0]}:</span><span class="quant-v">${q[1]}</span></div>`).join("")}
-    </div>`:""}
-    ${genotypeBlock}
-    ${notesBlock}
-    ${risksBlock}
-    ${refsHtml(d.refs)}
-    <div class="tag-strip" style="margin-top:8px">${d.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+    ${expandBtn}
+    ${extraSection}
+    <div class="tag-strip" style="margin-top:6px">${d.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
     ${connected.length?`<div class="sec-hdr">🔗 Связи (${connected.length})</div>
       ${connected.map(l=>{
         const sid=l.source.id||l.source,tid=l.target.id||l.target;
@@ -1246,36 +1296,52 @@ function showConnPanel(srcId,tgtId,lbl){
   document.getElementById("conn-body").classList.remove("collapsed");
   document.getElementById("conn-col-btn").textContent="▾";
 
-  function nodeBlock(n,fallId){
+  function nodeBlock(n, fallId, suffix){
     if(!n) return `<div class="conn-node"><div class="conn-node-title">${fallId}</div></div>`;
-    const C=TYPES[n.type]?.color||"#64748b";
+    const C = TYPES[n.type]?.color||"#64748b";
     const pBadge = n.priority ? priorityBadge(n.priority) : "";
-    const chemInfo = (n.formula||n.mw) ? `<div style="font-size:10px;color:#64748b;margin:3px 0">
+    const chemInfo = (n.formula||n.mw) ? `<div style="font-size:10px;margin:3px 0">
       ${n.formula?`<span style="color:#cbd5e1;font-weight:600">${n.formula}</span>`:""}
       ${n.mw?`<span style="margin-left:8px;color:#94a3b8">${n.mw}</span>`:""}
     </div>` : "";
-    const quantHtml = n.quant&&n.quant.length ? `<div class="quant-block" style="margin-top:6px">
-      ${n.quant.map(q=>`<div class="quant-row"><span class="quant-k">${q[0]}:</span><span class="quant-v">${q[1]}</span></div>`).join("")}
-    </div>` : "";
-    const risksHtml = n.risks&&n.risks.length ? `<div style="margin-top:5px">
-      ${n.risks.slice(0,2).map(r=>`<div class="risk-item" style="font-size:10px">${r}</div>`).join("")}
-      ${n.risks.length>2?`<div style="font-size:9px;color:#475569;padding-left:14px">+${n.risks.length-2} ещё рисков…</div>`:""}
-    </div>` : "";
+
+    // Expandable content
+    const quantHtml = n.quant&&n.quant.length ? `<div class="sec-hdr">📊 Данные</div>
+      <div class="quant-block">${n.quant.map(q=>`<div class="quant-row"><span class="quant-k">${q[0]}:</span><span class="quant-v">${q[1]}</span></div>`).join("")}</div>` : "";
+    const genoHtml = n.genotype ? `<div class="sec-hdr">🧬 Генотип</div><div class="genotype-block">${n.genotype}</div>` : "";
+    const notesHtml = n.notes ? `<div class="sec-hdr">💡 Примечания</div><div class="notes-block">${n.notes}</div>` : "";
+    const risksHtml = n.risks&&n.risks.length ? `<div class="sec-hdr">⚠ Риски</div>
+      <div class="risk-block">${n.risks.map(r=>`<div class="risk-item" style="font-size:10px">${r}</div>`).join("")}</div>` : "";
+    const refsBlock = n.refs&&n.refs.length ? refsHtml(n.refs) : "";
+
+    const hints = buildHints(n);
+    const extraId = `cx-${(n.id||fallId).replace(/[^a-zA-Z0-9]/g,"_")}_${suffix||""}`;
+    const hasExtra = hints.length > 0;
+    const expandBtn = hasExtra ? `
+      <button class="expand-btn" onclick="toggleExtra('${extraId}',this)">
+        <span class="eb-hints">${hints.map(h=>`<span class="eb-hint">${h.t}</span>`).join("")}</span>
+        <span class="eb-arrow">▼</span>
+      </button>` : "";
+    const extraSection = hasExtra ? `
+      <div class="extra-section" id="${extraId}">
+        ${quantHtml}${genoHtml}${notesHtml}${risksHtml}${refsBlock}
+      </div>` : "";
+
     return `<div class="conn-node" style="border-color:${C}40">
       <div class="conn-node-title" style="color:${C}">[${n.type}] ${n.label} ${pBadge}</div>
       ${chemInfo}
       <div class="conn-node-desc">${n.detail}</div>
-      ${quantHtml}
-      ${risksHtml}
+      ${expandBtn}
+      ${extraSection}
       <div style="margin-top:5px">${n.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
     </div>`;
   }
 
   document.getElementById("conn-body").innerHTML=`
-    ${nodeBlock(src,srcId)}
+    ${nodeBlock(src,srcId,"s")}
     <div class="conn-arrow">↓</div>
     <div class="conn-lbl">${lbl}</div>
-    ${nodeBlock(tgt,tgtId)}
+    ${nodeBlock(tgt,tgtId,"t")}
   `;
   document.getElementById("conn-panel").style.display="block";
 }
