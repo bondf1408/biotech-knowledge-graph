@@ -66,19 +66,19 @@ body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; 
 /* ── Node card internals ── */
 .card-badge { display: inline-block; font-size: 10px; font-weight: 700;
   padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
-.card-desc { font-size: 12px; color: #94a3b8; line-height: 1.6; margin-bottom: 8px; }
+.card-desc { font-size: 12px; color: #e2e8f0; line-height: 1.6; margin-bottom: 8px; }
 .card-meta { display: grid; grid-template-columns: auto 1fr; gap: 3px 8px; margin-bottom: 8px; }
-.card-meta-k { font-size: 10px; color: #475569; white-space: nowrap; }
-.card-meta-v { font-size: 11px; color: #cbd5e1; }
+.card-meta-k { font-size: 10px; color: #64748b; white-space: nowrap; }
+.card-meta-v { font-size: 11px; color: #f1f5f9; }
 .conf-bar { display: inline-flex; gap: 2px; }
 .conf-pip { width: 8px; height: 8px; border-radius: 2px; }
 .quant-block { background: #0f172a; border: 1px solid #1e293b; border-radius: 6px;
   padding: 7px 9px; margin-bottom: 8px; }
-.quant-row { font-size: 11px; color: #94a3b8; padding: 2px 0;
+.quant-row { font-size: 11px; color: #cbd5e1; padding: 2px 0;
   border-bottom: 1px solid #1e293b; display: flex; gap: 6px; }
 .quant-row:last-child { border-bottom: none; }
-.quant-k { color: #64748b; flex-shrink: 0; }
-.quant-v { color: #e2e8f0; font-weight: 600; }
+.quant-k { color: #94a3b8; flex-shrink: 0; }
+.quant-v { color: #ffffff; font-weight: 600; }
 .tag-strip { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; }
 .tag { background: #1e293b; border-radius: 3px; padding: 1px 5px; font-size: 10px; color: #64748b; }
 .sec-hdr { font-size: 10px; font-weight: 700; text-transform: uppercase;
@@ -97,7 +97,7 @@ body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; 
 #conn-panel { bottom: 12px; right: 14px; width: 300px; }
 .conn-node { background: #0f172a; border: 1px solid #1e293b; border-radius: 7px; padding: 9px 10px; margin-bottom: 6px; }
 .conn-node-title { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
-.conn-node-desc { font-size: 11px; color: #64748b; line-height: 1.5; }
+.conn-node-desc { font-size: 11px; color: #cbd5e1; line-height: 1.5; }
 .conn-arrow { text-align: center; font-size: 22px; color: #334155; margin: 2px 0; line-height: 1; }
 .conn-lbl { text-align: center; background: #1e293b; border-radius: 5px;
   padding: 4px 10px; font-size: 12px; font-weight: 600; color: #94a3b8; margin: 4px 0 6px; }
@@ -125,14 +125,15 @@ body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; 
 
 /* ── Graph styles ── */
 svg { width: 100vw; height: 100vh; }
-.link { stroke-opacity: 0.3; }
+.link { stroke-opacity: 0.35; cursor: pointer; transition: stroke-opacity .15s; }
 .link.sel-link { stroke-opacity: 1; stroke-width: 3; }
+.link.dimmed { stroke-opacity: 0.05 !important; }
 .node circle { stroke-width: 1.5; cursor: pointer; }
 .node circle:hover { stroke-width: 3; }
-.node text { pointer-events: none; fill: #cbd5e1; font-size: 10px; font-weight: 600; }
-.node.dimmed { opacity: 0.06; }
-.node.highlighted circle { stroke-width: 3; }
-.node.selected circle { stroke-width: 3.5; filter: drop-shadow(0 0 6px currentColor); }
+.node text { pointer-events: none; fill: #ffffff; font-size: 10px; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+.node.dimmed { opacity: 0.18; }
+.node.highlighted circle { stroke-width: 3.5; filter: drop-shadow(0 0 6px currentColor) brightness(1.35); }
+.node.selected circle { stroke-width: 3.5; filter: drop-shadow(0 0 8px currentColor); }
 .node.searched circle { stroke-width: 4; filter: brightness(1.5); }
 </style>
 </head>
@@ -799,6 +800,14 @@ const zoom = d3.zoom().scaleExtent([0.08, 5]).on("zoom", e => {
   document.getElementById("zoom-info").textContent = `${e.transform.k.toFixed(2)}×`;
 });
 svg.call(zoom);
+svg.on("click", e => {
+  if(e.target.tagName === "svg" || e.target.tagName === "g"){
+    applyDim();
+    nodeSel.classed("highlighted",false);
+    nodeSel.classed("dimmed",n=>hiddenTypes.has(n.type));
+    linkSel.classed("dimmed",false);
+  }
+});
 
 const nodeMap = new Map(nodes.map(n => [n.id, n]));
 const processedLinks = links.map(l => ({source:l.s, target:l.t, label:l.lbl, weight:l.w||1}))
@@ -814,7 +823,16 @@ const linkG = g.append("g");
 const linkSel = linkG.selectAll("line").data(processedLinks).enter().append("line")
   .attr("class","link")
   .attr("stroke", d => { const t=nodeMap.get(d.target.id||d.target); return t?TYPES[t.type]?.color+"80":"#33415580"; })
-  .attr("stroke-width", d=>d.weight);
+  .attr("stroke-width", d=>Math.max(d.weight, 2))
+  .on("click",(e,d)=>{
+    e.stopPropagation();
+    const sid=d.source.id||d.source, tid=d.target.id||d.target;
+    showConnPanel(sid,tid,d.label);
+    const connIds=new Set([sid,tid]);
+    nodeSel.classed("highlighted",n=>connIds.has(n.id));
+    nodeSel.classed("dimmed",n=>!connIds.has(n.id));
+    linkSel.classed("dimmed",l=>{ const ls=l.source.id||l.source,lt=l.target.id||l.target; return !(connIds.has(ls)||connIds.has(lt)); });
+  });
 
 const nodeG = g.append("g");
 const nodeSel = nodeG.selectAll(".node").data(nodes).enter().append("g")
@@ -866,6 +884,7 @@ function toggleType(k,btn){
 }
 function applyDim(){
   nodeSel.classed("dimmed",d=>hiddenTypes.has(d.type));
+  linkSel.classed("dimmed",false);
   linkSel.style("opacity",d=>{
     const st=nodeMap.get(d.source.id||d.source)?.type;
     const tt=nodeMap.get(d.target.id||d.target)?.type;
@@ -985,7 +1004,12 @@ function togglePanel(name){
 }
 function closePanel(name){
   document.getElementById(name+"-panel").style.display="none";
-  if(name==="node"){applyDim();nodeSel.classed("highlighted",false);}
+  if(name==="node"||name==="conn"){
+    applyDim();
+    nodeSel.classed("highlighted",false);
+    nodeSel.classed("dimmed",n=>hiddenTypes.has(n.type));
+    linkSel.classed("dimmed",false);
+  }
 }
 
 // Draggable
@@ -1067,6 +1091,7 @@ function showNodePanel(d){
   connected.forEach(l=>{connIds.add(l.source.id||l.source);connIds.add(l.target.id||l.target);});
   nodeSel.classed("highlighted",n=>connIds.has(n.id));
   nodeSel.classed("dimmed",n=>!connIds.has(n.id));
+  linkSel.classed("dimmed",l=>{ const ls=l.source.id||l.source,lt=l.target.id||l.target; return !connIds.has(ls)&&!connIds.has(lt); });
 }
 
 // ── Connection panel ──
