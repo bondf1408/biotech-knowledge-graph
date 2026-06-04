@@ -60,7 +60,7 @@ body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; 
 .panel-btn { background: none; border: none; color: #475569; cursor: pointer;
   font-size: 14px; padding: 0 3px; line-height: 1; flex-shrink: 0; }
 .panel-btn:hover { color: #e2e8f0; }
-.panel-body { padding: 11px; overflow-y: auto; max-height: 56vh; transition: max-height .2s, padding .2s; }
+.panel-body { padding: 11px; overflow-y: auto; max-height: 74vh; transition: max-height .2s, padding .2s; }
 .panel-body.collapsed { max-height: 0; padding: 0; overflow: hidden; }
 
 /* ── Node card internals ── */
@@ -83,6 +83,46 @@ body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; 
 .tag { background: #1e293b; border-radius: 3px; padding: 1px 5px; font-size: 10px; color: #64748b; }
 .sec-hdr { font-size: 10px; font-weight: 700; text-transform: uppercase;
   letter-spacing: .06em; color: #334155; margin: 10px 0 5px; }
+
+/* ── Priority badge ── */
+.priority-badge { display:inline-block; font-size:9px; font-weight:800; padding:1px 7px;
+  border-radius:3px; margin-left:6px; vertical-align:middle; letter-spacing:.04em; }
+.priority-critical { background:#7f1d1d; color:#fca5a5; border:1px solid #ef4444; }
+.priority-high     { background:#78350f; color:#fcd34d; border:1px solid #f59e0b; }
+.priority-medium   { background:#1e3a5f; color:#93c5fd; border:1px solid #3b82f6; }
+.priority-low      { background:#1e293b; color:#64748b; border:1px solid #334155; }
+
+/* ── Chemical info row ── */
+.chem-row { display:flex; flex-wrap:wrap; gap:14px; background:#0f172a; border:1px solid #1e293b;
+  border-radius:5px; padding:5px 9px; margin-bottom:8px; }
+.chem-item { display:flex; flex-direction:column; gap:1px; }
+.chem-k { font-size:9px; color:#64748b; text-transform:uppercase; letter-spacing:.04em; }
+.chem-v { font-size:12px; color:#f1f5f9; font-weight:600; }
+
+/* ── Genotype block ── */
+.genotype-block { background:#0f1f10; border:1px solid #166534; border-radius:5px;
+  padding:6px 9px; font-size:10px; color:#86efac; font-family:monospace; line-height:1.6;
+  margin-bottom:8px; word-break:break-word; }
+
+/* ── Notes block ── */
+.notes-block { background:#0c1522; border:1px solid #1e3a5f; border-radius:6px;
+  padding:7px 9px; font-size:11px; color:#93c5fd; line-height:1.6; margin-bottom:8px; }
+
+/* ── Risk items ── */
+.risk-block { margin-bottom:8px; }
+.risk-item { font-size:11px; color:#fcd34d; padding:3px 6px 3px 14px;
+  border-left:2px solid #f59e0b; margin-bottom:3px; line-height:1.4; position:relative; }
+.risk-item::before { content:"⚠"; position:absolute; left:-1px; font-size:8px;
+  color:#f59e0b; top:5px; transform:translateX(-50%); }
+
+/* ── Refs block ── */
+.refs-block { margin-bottom:8px; }
+.ref-link { display:flex; align-items:center; gap:5px; font-size:10px; color:#60a5fa;
+  text-decoration:none; padding:4px 6px; border-bottom:1px solid #1e293b;
+  border-radius:3px; transition:background .1s; }
+.ref-link:last-child { border-bottom:none; }
+.ref-link:hover { background:#1e3a5f; color:#93c5fd; text-decoration:none; }
+.ref-icon { font-size:9px; opacity:.7; flex-shrink:0; }
 .rel-row {
   display: flex; align-items: center; gap: 5px; padding: 4px 7px;
   border-radius: 6px; margin-bottom: 2px; cursor: pointer;
@@ -214,37 +254,54 @@ const nodes = [
   {id:"DVA",   label:"DVA",   type:"CMP", confidence:"medium",
    organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
    source:"Luo 2019 / Ma 2022",
-   detail:"Divarinic acid — C3 поликетид, предшественник CBGVA. Синтезируется из propionyl-CoA + 3×malonyl-CoA через OLS→OAC. Стартовый продукт STR-001.",
-   quant:[["Ожид. тит. (расч.)","100–300 мг/л"],["C-цепь стартера","C3 (пропионил)"],["Путь","OLS+OAC, тетракетид"]],
+   formula:"C₁₂H₁₄O₄", mw:"222.24 г/моль", priority:"critical",
+   detail:"Divarinic acid — C3 поликетид, предшественник CBGVA. Синтезируется из propionyl-CoA + 3×malonyl-CoA через OLS→OAC. Стартовый продукт STR-001. Стабильна при pH 5–7, чувствительна к свету.",
+   quant:[["Ожид. тит. (расч.)","100–300 мг/л"],["C-цепь стартера","C3 (пропионил)"],["Путь","OLS+OAC, тетракетид"],["LogP (расч.)","~2.4 (умеренно липофильна)"],["Стабильность","pH 5–7, хранить при -20°C"]],
+   risks:["Нет прямых данных о DVA-титре в Y.lipolytica — всё инференс из OLA-системы","OLS может преимущественно использовать hexanoyl-CoA вместо propionyl-CoA","Возможно накопление побочных поликетидов при неоптимальном соотношении стартер/удлинитель","Конкуренция за malonyl-CoA с синтезом жирных кислот (FAS) — главный лимит"],
+   refs:[{doi:"10.1038/s42003-022-04202-1",text:"Ma 2022 – OLA референс (C5-аналог)"},
+         {doi:"10.1126/science.aaw1875",text:"Luo 2019 – DVA/CBGVA в S.cerevisiae"}],
    tags:["DVA","polyketide","C3","precursor"]},
 
   {id:"CBGVA", label:"CBGVA", type:"CMP", confidence:"medium",
    organism:"yarrowia_lipolytica", target:["CBGVA"], pathway:"PWY-0002",
    source:"Luo 2019",
-   detail:"Cannabigerovarinic acid — DVA + GPP → CBGVA (CsPT4). Промежуточный каннабиноид, предшественник THCVA. Передаётся от STR-001 к STR-002.",
-   quant:[["Путь пренилир.","DVA + GPP → CBGVA"],["Фермент","CsPT4 (мембраносвяз.)"]],
+   formula:"C₂₂H₃₂O₄", mw:"364.49 г/моль", priority:"critical",
+   detail:"Cannabigerovarinic acid — DVA + GPP → CBGVA (CsPT4). Промежуточный каннабиноид C3-серии, предшественник THCVA. Передаётся от STR-001 к STR-002 через кондиционированную среду.",
+   quant:[["Путь пренилир.","DVA + GPP → CBGVA"],["Фермент","CsPT4 (мембраносвяз.)"],["Km CsPT4 для OA (C5-аналог)","6.73 ± 0.26 µM"],["Стабильность","Чувствителен к окислению на воздухе"],["Аналог","CBGA (C5) — до 10 мг/л в S.cer."]],
+   risks:["Данные о стабильности CBGVA в культуральной среде отсутствуют","GPP-пул конкурирует с эргостероловым путём (ERG9→ERG20)","CsPT4 — мембраносвязанная: экспрессия в ER может быть ограничена","Km CsPT4 может отличаться для DVA vs OA (C3 vs C5 субстрат)"],
+   refs:[{doi:"10.1126/science.aaw1875",text:"Luo 2019 – CsPT4, CBGA/CBGVA синтез"}],
    tags:["CBGVA","C3-cannabinoid","intermediate"]},
 
   {id:"THCVA", label:"THCVA", type:"CMP", confidence:"medium",
    organism:"yarrowia_lipolytica", target:["THCVA"], pathway:"PWY-0003",
    source:"Ludwig 2019",
-   detail:"Tetrahydrocannabivarinic acid — КОНЕЧНЫЙ ЦЕЛЕВОЙ ПРОДУКТ. CBGVA → THCVA (THCAS, FAD-зависимая оксидоредуктаза, pH 4.5–5.5, O₂). Предшественник THCV (декарбоксилирование).",
-   quant:[["Прогноз тит. STR-002","5–15 мг/л"],["Km THCAS для CBGA","~15 µM"],["pH оптимум THCAS","4.5–5.5"],["Аналог","THCA (C5) до 8 мг/л в S.cer."]],
+   formula:"C₂₂H₃₀O₄", mw:"362.47 г/моль", priority:"critical",
+   detail:"Tetrahydrocannabivarinic acid — КОНЕЧНЫЙ ЦЕЛЕВОЙ ПРОДУКТ. CBGVA → THCVA (THCAS, FAD-зависимая оксидоредуктаза, pH 4.5–5.5, O₂). Предшественник THCV (декарбоксилирование при 105°C или UV). Биологически активен как агонист CB1/CB2.",
+   quant:[["Прогноз тит. STR-002","5–15 мг/л"],["Km THCAS для CBGA","~15 µM"],["pH оптимум THCAS","4.5–5.5"],["Аналог THCA (C5)","до 8 мг/л в S.cer."],["Декарбоксил. до THCV","105°C или УФ-облучение"],["LogP (расч.)","~5.2 (высоколипофильный)"]],
+   risks:["pH-конфликт: рост дрожжей pH 5.5–6.0 vs THCAS оптимум pH 4.5–5.5 — главный барьер","Декарбоксилирование до THCV происходит при нагреве/pH изменениях (потеря продукта)","Нет прямых данных об экспрессии THCAS в Y.lipolytica","THCAS нестабильна при >30°C — ограничивает температуру ферментации"],
+   refs:[{doi:"10.1002/biot.201900575",text:"Ludwig 2019 – THCAS экспрессия и оптимизация"},
+         {doi:"10.1126/science.aaw1875",text:"Luo 2019 – THCA в S.cerevisiae (до 8 мг/л)"}],
    tags:["THCVA","target","C3-cannabinoid"]},
 
   // MET
   {id:"propionyl-CoA", label:"Propionyl-CoA", type:"MET", confidence:"low",
    organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
    source:"Инференс из OLA-пути",
-   detail:"C3 стартовая единица для OLS в DVA-пути. Активируется CoA-лигазой (PCS) из внешнего пропионата. Лимитирующий предшественник — эндогенный пул минимален.",
-   quant:[["Источник","Пропионат → PCS-лигаза → CoA"],["Токсич. пропионата",">5 г/л"],["Аналог","Гексаноил-CoA (C5 для OLA)"]],
+   priority:"critical",
+   detail:"C3 стартовая единица для OLS в DVA-пути. Активируется CoA-лигазой (PCS) из внешнего пропионата. Лимитирующий предшественник — эндогенный пул в Y.lipolytica минимален, метаболизируется через метилмалонил-CoA путь.",
+   quant:[["Источник","Пропионат → PCS-лигаза → CoA"],["Токсич. пропионата",">5 г/л → ↓рост"],["Эндогенный пул","Очень низкий (нативный метаб. минимален)"],["Аналог","Hexanoyl-CoA (C5) → OLA (Ma 2022)"],["Альт. источник","Треонин-катаболизм → propionyl-CoA"]],
+   risks:["Эндогенный пул propionyl-CoA в Y.lipolytica крайне мал — требует внешней подачи пропионата","Пропионат токсичен при >5 г/л — нужен fed-batch режим","PCS-лигаза (propionyl-CoA synthetase) не охарактеризована в Y.lipolytica","OLS может иметь низкое сродство к propionyl-CoA по сравнению с hexanoyl-CoA"],
+   notes:"Критически важный предшественник. Аналог гексаноил-CoA показал 87× прирост в OLA-системе (Ma 2022) — ожидается схожий эффект для propionyl-CoA при корректной инженерии.",
    tags:["propionyl-CoA","starter-unit","C3"]},
 
   {id:"malonyl-CoA", label:"Malonyl-CoA", type:"MET", confidence:"medium",
    organism:"yarrowia_lipolytica", target:["DVA","CBGVA","THCVA"], pathway:"PWY-0001",
    source:"Ma 2022",
-   detail:"Удлиняющая единица для OLS (3 молекулы на цикл). Производится ACC1 из acetyl-CoA + CO₂. Ключевой лимитирующий метаболит — конкурирует с синтезом жирных кислот.",
-   quant:[["OE ACC1 эффект","1.8 → 8.9 мг/л OLA (+395%)"],["Лимитир. фермент","ACC1 (биотин-завис.)"],["Конкурент","Синтаза жирных к-т (FAS)"]],
+   priority:"critical",
+   detail:"Удлиняющая единица для OLS (3 молекулы на цикл). Производится ACC1 из acetyl-CoA + CO₂. Ключевой лимитирующий метаболит — конкурирует с синтезом жирных кислот (FAS). Точка максимального инженерного воздействия на поликетидный выход.",
+   quant:[["OE ACC1 эффект","1.8 → 8.9 мг/л OLA (+395%)"],["Лимитир. фермент","ACC1 (биотин-завис.)"],["Конкурент","FAS (fatty acid synthase)"],["На 1 DVA","3 молекулы malonyl-CoA"],["CaCO₃ эффект","↑мalonyl-CoA через pH стабилизацию"],["OE MAE1+ANT1","↑NADPH → ↑ACC1 активность"]],
+   risks:["Конкуренция с FAS — главный дренаж malonyl-CoA пула (до 90% потока идёт в жирные кислоты)","ACC1 ингибируется Snf1-киназой при росте на глюкозе","Биотин-дефицит → потеря всей ACC1 активности","Высокий malonyl-CoA токсичен — необходимо балансировать с поглощением через PKS"],
+   refs:[{doi:"10.1038/s42003-022-04202-1",text:"Ma 2022 – ACC1 OE + malonyl-CoA стратегии"}],
    tags:["malonyl-CoA","extender","ACC1","bottleneck"]},
 
   {id:"acetyl-CoA", label:"Acetyl-CoA", type:"MET", confidence:"high",
@@ -272,43 +329,68 @@ const nodes = [
   {id:"ENZ-OLS", label:"OLS/TKS", type:"ENZ", confidence:"medium",
    organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
    source:"Luo 2019 / Ma 2022",
-   detail:"Olivetol/tetraketide synthase. Тип III PKS. Конденсирует propionyl-CoA + 3×malonyl-CoA → тетракетидный интермедиат. Специфичность к starter-unit критична: гексаноил vs пропионил vs бутирил.",
-   quant:[["Тип","Type III PKS"],["Субстрат (стартер)","Propionyl-CoA (C3 для DVA)"],["Km hexanoyl","~20–50 µM (оценка)"],["Продукт","Тетракетид → OAC"]],
+   priority:"critical",
+   detail:"Olivetol/tetraketide synthase. Тип III PKS из Cannabis sativa. Конденсирует propionyl-CoA + 3×malonyl-CoA → тетракетидный интермедиат. Специфичность к starter-unit критична: гексаноил > пропионил. Без OAC → olivetol (неверный продукт). Таргетинг в пероксисомы (PTS1) увеличивает выход.",
+   quant:[["Тип","Type III PKS (хомодимер)"],["Субстрат (стартер)","Propionyl-CoA (C3 для DVA)"],["Km hexanoyl-CoA","~20–50 µM (оценка)"],["Продукт без OAC","Olivetol (неверная циклизация)"],["Пероксисомальн. OE","↑ выход за счёт ацетил-CoA пула"],["Коэкспрессия","OLS + OAC обязательна"]],
+   risks:["Низкая специфичность к propionyl-CoA — OLS может предпочитать hexanoyl-CoA (C5 vs C3)","Без OAC образуется olivetol, а не DVA/OLA","Требует оптимального кодона для Y.lipolytica (Cannabis codon bias)","Конкуренция за malonyl-CoA с нативным FAS — до 90% потока уходит в жирные кислоты"],
+   refs:[{doi:"10.1038/s42003-022-04202-1",text:"Ma 2022 – OLS+OAC в Y.lipolytica, +87× OLA"},
+         {doi:"10.1126/science.aaw1875",text:"Luo 2019 – OLS+OAC+CsPT4+THCAS в S.cer."}],
+   notes:"Ключевой фермент поликетидного пути. Пероксисомальный таргетинг (Ma 2022: YL122, +PEX10) дал 4.797 vs 3.49 мг/л OLA. Рассмотреть локализацию OLS-PTS1 для DVA-пути.",
    tags:["OLS","TKS","PKS","type-III","starter-specificity"]},
 
   {id:"ENZ-OAC", label:"OAC", type:"ENZ", confidence:"medium",
    organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
    source:"Austin 2004 / Gagne 2012",
-   detail:"Olivetolic acid cyclase. Циклизует тетракетидный интермедиат → DVA (C3) или OLA (C5). Требует Mg²⁺ или Mn²⁺ для стабилизации активного центра. pH-оптимум 5.5–6.0.",
-   quant:[["pH оптимум","5.5–6.0"],["Кофактор","Mg²⁺ 0.5–1 мМ (или Mn²⁺)"],["T оптимум","28–30°C"],["Продукт","DVA или OLA"]],
+   priority:"critical",
+   detail:"Olivetolic acid cyclase. CTAS-суперсемейство. Циклизует тетракетидный интермедиат → DVA (C3) или OLA (C5) по правилу C2→C7 альдольной конденсации. Требует Mg²⁺ или Mn²⁺ для стабилизации карбоанионного переходного состояния. pH-оптимум 5.5–6.0.",
+   quant:[["pH оптимум","5.5–6.0"],["Кофактор","Mg²⁺ 0.5–1 мМ (или Mn²⁺)"],["T оптимум","28–30°C"],["Продукт (C3 стартер)","DVA (divarinic acid)"],["Продукт (C5 стартер)","OLA (olivetolic acid)"],["Механизм","Альдольная конденсация C2-C7"]],
+   risks:["pH 5.5–6.0 конфликтует с THCAS оптимумом 4.5–5.5 — нужна двухфазная стратегия","Дефицит Mg²⁺ (<0.3 мМ) → резкое падение активности","Возможна кросс-реактивность: OAC циклизует и C3-, и C5-тетракетид","Неверная циклизация → triketide pyrone (побочный продукт)"],
+   refs:[{doi:"10.1021/bi400937j",text:"Gagne 2012 – OAC структура и механизм"},
+         {doi:"10.1073/pnas.0401220101",text:"Austin 2004 – идентификация OAC из Cannabis"}],
    tags:["OAC","cyclase","Mg2+","pH-sensitive"]},
 
   {id:"ENZ-CsPT4", label:"CsPT4", type:"ENZ", confidence:"medium",
    organism:"yarrowia_lipolytica", target:["CBGVA"], pathway:"PWY-0002",
    source:"Luo 2019 DOI: 10.1126/science.aaw1875",
-   detail:"Ароматическая пренилтрансфераза. DVA + GPP → CBGVA (или OLA + GPP → CBGA). Мембраносвязанная/микросомальная. Km OA = 6.73 µM. Не-Michaelis-Menten поведение по GPP.",
-   quant:[["Km (OA)","6.73 ± 0.26 µM"],["GPP кинетика","Не-Michaelis-Menten"],["Локализация","Мембраносвязанная/ER"],["Инкубация","500 µM OA + 500 µM GPP, 30°C, 1 ч"]],
+   priority:"high",
+   detail:"Ароматическая пренилтрансфераза из Cannabis sativa. DVA + GPP → CBGVA (или OLA + GPP → CBGA). Мембраносвязанная (ER/Golgi). Km OA = 6.73 µM. Не-Michaelis-Menten поведение по GPP — вероятна аллостерическая регуляция. Для функции необходима правильная мембранная среда.",
+   quant:[["Km (OA/DVA)","6.73 ± 0.26 µM"],["GPP кинетика","Не-Michaelis-Menten (аллостерика?)"],["Локализация","Мембраносвязанная (ER/Golgi)"],["Инкубация in vitro","500 µM OA + 500 µM GPP, 30°C, 1 ч"],["Оптим. pH (in vitro)","~7.0–7.5"],["Необходим","Mg²⁺ для каталитической активности"]],
+   risks:["Мембраносвязанность — правильный фолдинг и встраивание в ER критично для активности","GPP конкурирует с ERG9 (сквален-синтаза) → нужно ослабление ERG9","Km CsPT4 для DVA (C3) может быть выше, чем для OA (C5) — нет прямых данных","Высокий GPP пул токсичен — необходим баланс между CsPT4 и потреблением"],
+   refs:[{doi:"10.1126/science.aaw1875",text:"Luo 2019 – CsPT4 характеризация, Km"},
+         {doi:"10.1038/s42003-022-04202-1",text:"Ma 2022 – CsPT4 + GPP-инженерия"}],
    tags:["CsPT4","prenyltransferase","membrane","Km"]},
 
   {id:"ENZ-THCS", label:"THCAS", type:"ENZ", confidence:"medium",
    organism:"yarrowia_lipolytica", target:["THCVA"], pathway:"PWY-0003",
    source:"Laverty 2019",
-   detail:"THCA synthase. FAD-зависимая оксидоредуктаза. CBGVA → THCVA (или CBGA → THCA). Оптимум pH 4.5–5.5, требует O₂ как акцептор. Нестабильна при >30°C.",
-   quant:[["Km (CBGA)","~15 µM"],["Vmax","~0.45 нмоль/мин/мкг"],["pH оптимум","4.5–5.5"],["Кофактор","FAD (ковалентно связан)"],["O₂","Обязателен как акцептор е⁻"]],
+   priority:"critical",
+   detail:"THCA synthase — FAD-зависимая оксидоредуктаза из C.sativa. CBGVA → THCVA (или CBGA → THCA) через окислительную циклизацию. FAD ковалентно связан (His174). Оптимум pH 4.5–5.5, требует O₂ как терминальный акцептор электронов. Нестабильна при >30°C. Хорошо работает при секреции в кислую среду.",
+   quant:[["Km (CBGA)","~15 µM"],["Vmax","~0.45 нмоль/мин/мкг белка"],["pH оптимум","4.5–5.5"],["T оптимум","≤28°C"],["Кофактор FAD","Ковалентно (His174-FAD)"],["O₂","Обязателен: FADH₂ + O₂ → FAD + H₂O₂"],["H₂O₂ побочно","Требует каталазы или пероксидазы"]],
+   risks:["pH-конфликт: Y.lipolytica растёт при pH 5.5–6.0, THCAS активна при 4.5–5.5 — КРИТИЧЕСКИЙ барьер","Нестабильность при >30°C ограничивает ферментационную температуру до 25–28°C","Накопление H₂O₂ (побочный продукт) инактивирует THCAS и токсично для клеток","Нет данных об экспрессии THCAS в Y.lipolytica — только S.cerevisiae и in vitro"],
+   refs:[{doi:"10.1002/biot.201900575",text:"Ludwig 2019 – THCAS характеризация"},
+         {doi:"10.1126/science.aaw1875",text:"Luo 2019 – THCAS + CBGA→THCA до 8 мг/л"}],
+   notes:"Ключевое решение: двухфазная стратегия pH (рост pH 5.5–6.0 → снижение до 4.5–5.0 при продукции). Альтернатива: секреция THCAS во внеклеточную кислую среду или таргетинг в кислые везикулы/вакуоли.",
    tags:["THCAS","FAD","oxidase","pH-4.5","O2-dependent"]},
 
   {id:"ENZ-ACC1", label:"ACC1", type:"ENZ", confidence:"high",
    organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
    source:"Ma 2022 / Tai 2016",
-   detail:"Ацетил-CoA карбоксилаза. Acetyl-CoA + HCO₃⁻ + ATP → malonyl-CoA. Биотин-зависимая. Лимитирующий фермент мalonyl-CoA пула. Ингибируется фосфорилированием (Snf1-киназа).",
-   quant:[["OE эффект","1.8 → 8.9 мг/л OLA (+395%)"],["Мутант S667A/S1178A","Feedback-нечувствит."],["Кофактор","Биотин (0.02–0.1 мг/л среды)"],["Mg²⁺ зависимость","Да (карбоксилирование)"]],
+   priority:"high",
+   detail:"Ацетил-CoA карбоксилаза — биотин-зависимый фермент. Acetyl-CoA + HCO₃⁻ + ATP → malonyl-CoA + ADP + Pᵢ. Лимитирующий фермент мalonyl-CoA пула. Ингибируется фосфорилированием Snf1-киназой. Удаление интрона (ylACC1) и мутации S667A/S1178A → feedback-нечувствительная версия.",
+   quant:[["OE ylACC1 эффект","1.04 → 1.857 мг/л OLA (+79%)"],["Мутант S659A","↑активность, снижен Snf1-контроль"],["Кофактор","Биотин (ковалентно связан)"],["Mg²⁺","Обязателен для карбоксилирования"],["Конкурент","FAS, FASII (жирные кислоты)"],["Общий эффект в YL128","1.8 → 8.9 мг/л (+395%)"]],
+   risks:["Snf1-киназа фосфорилирует и инактивирует ACC1 при избытке продукта — feedback-петля","Биотин-дефицит в среде полностью блокирует ACC1","Высокая OE ACC1 может нарушить жирнокислотный гомеостаз клетки","Конкуренция за HCO₃⁻ с другими карбоксилазами"],
+   refs:[{doi:"10.1038/s42003-022-04202-1",text:"Ma 2022 – ylACC1 OE, +87× OLA"},
+         {doi:"10.1038/nchembio.2153",text:"Tai 2016 – ACC1 инженерия в S.cer."}],
    tags:["ACC1","biotin","malonyl-CoA","rate-limiting","Snf1"]},
 
   {id:"ENZ-ERG20", label:"ERG20", type:"ENZ", confidence:"medium",
    organism:"yarrowia_lipolytica", target:["general"], pathway:"PWY-0004",
    source:"Обзор MVA Y.lipolytica",
-   detail:"FPP/GPP synthase. IPP + DMAPP → GPP (→FPP). Mg²⁺-зависимая. Мутант F96W-N119W накапливает GPP. Конкурирует за GPP с CsPT4 (нужен GPP) vs ERG9 (сквален).",
-   quant:[["Мутант F96W-N119W","↑GPP, ↓FPP"],["Кофактор","Mg²⁺"],["Конкурент","ERG9 (сквален)"]],
+   priority:"medium",
+   detail:"FPP/GPP synthase — дивалентная металлозависимая трансфераза. IPP + DMAPP → GPP (C10), затем GPP + IPP → FPP (C15). Мутант F96W-N119W перенаправляет поток к GPP, снижая FPP. Конкурирует с CsPT4 за GPP.",
+   quant:[["Мутант F96W-N119W","↑GPP пул, ↓FPP (~3-5×)"],["Кофактор","Mg²⁺ или Mn²⁺"],["Конкурент","ERG9 (сквален-синтаза, потребляет FPP)"],["Нативный продукт Y.lipolytica","FPP → эргостерол"],["Реакция","2×IPP + DMAPP → GPP + PPi"]],
+   risks:["ERG20 нативно производит преимущественно FPP, а не GPP — мутация обязательна","Накопление GPP токсично — необходим баланс с потреблением CsPT4","Снижение FPP влияет на синтез эргостерола — мембранная целостность под угрозой"],
+   refs:[{doi:"10.1016/j.biortech.2023.130233",text:"Liu 2024 – MVA инженерия в Y.lipolytica (1628 мг/л сквален)"}],
    tags:["ERG20","GPP","FPP","MVA","mutation"]},
 
   // PWY
@@ -584,23 +666,32 @@ const nodes = [
   {id:"LIT-qi2026", label:"Qi 2026", type:"LIT", confidence:"medium",
    organism:"yarrowia_lipolytica", target:["general"], pathway:"general",
    source:"PMID: 41781957 / DOI: 10.1186/s12934-026-02115-7",
-   detail:"Динамика ацетил-/малонил-CoA пулов в Y. lipolytica при EPA-поликетидном синтезе. Соотношение malonyl/acetyl-CoA определяет селективность поликетидного продукта.",
-   quant:[["PMID","41781957"],["Организм","Y. lipolytica"],["Ключевой вывод","Соотн. malonyl/acetyl-CoA → selektivität"]],
+   priority:"medium",
+   detail:"Динамика ацетил-/малонил-CoA пулов в Y. lipolytica при EPA-поликетидном синтезе. Соотношение malonyl/acetyl-CoA определяет селективность поликетидного продукта. Ключевой вывод для оптимизации DVA: нужно контролировать не только абсолютный пул malonyl-CoA, но и его соотношение с acetyl-CoA.",
+   quant:[["PMID","41781957"],["DOI","10.1186/s12934-026-02115-7"],["Журнал","Microbial Cell Factories"],["Организм","Y. lipolytica"],["Ключевой вывод","malonyl/acetyl-CoA соотношение → PKS селективность"],["Применение","Оптимизация DVA vs побочные поликетиды"]],
+   refs:[{doi:"10.1186/s12934-026-02115-7",pmid:"41781957",text:"Qi 2026 – CoA-динамика в Y.lipolytica при EPA-PKS"}],
    tags:["literature","2026","CoA-dynamics","EPA","Y.lipolytica"]},
 
   {id:"LIT-hong2025", label:"Hong 2025", type:"LIT", confidence:"medium",
    organism:"yarrowia_lipolytica", target:["CBGVA","THCVA"], pathway:"general",
    source:"DOI: 10.1016/j.bidere.2025.100021",
-   detail:"De novo биосинтез каннабиноидов в Y. lipolytica. Биомолекулярные конденсаты для локализации ферментов пути. 5–15× улучшение.",
-   quant:[["DOI","10.1016/j.bidere.2025.100021"],["Стратегия","Биомолек. конденсаты"],["Эффект конденсатов","5–15× (оценка)"]],
+   priority:"high",
+   detail:"De novo биосинтез каннабиноидов в Y. lipolytica с использованием биомолекулярных конденсатов для пространственной организации ферментного каскада. Конденсаты (фазовое разделение) локализуют CsPT4+THCAS, создавая высококонцентрированные микрокомпартменты. Даёт 5–15× улучшение тигра по сравнению с диффузной экспрессией.",
+   quant:[["DOI","10.1016/j.bidere.2025.100021"],["Журнал","Bioresources and Bioprocessing"],["Стратегия","Биомолекулярные конденсаты (фазовое разделение)"],["Эффект конденсатов","5–15× (по CBGA/CBGVA)"],["Организм","Y. lipolytica"],["Конденсатный партнёр","IDR-домены + PKS-ферменты"]],
+   refs:[{doi:"10.1016/j.bidere.2025.100021",text:"Hong 2025 – конденсаты для каннабиноидов в Yl"}],
+   notes:"Прямая применимость к STR-002: конденсаты CsPT4+THCAS могут решить проблему низкой активности за счёт локальной концентрации субстратов.",
    tags:["literature","2025","de-novo","condensates","Y.lipolytica"]},
 
-  {id:"LIT-ma2021", label:"Ma 2021", type:"LIT", confidence:"high",
+  {id:"LIT-ma2021", label:"Ma 2021/22", type:"LIT", confidence:"high",
    organism:"yarrowia_lipolytica", target:["OLA"], pathway:"PWY-0001",
    source:"DOI: 10.1101/2021.06.10.447928 (bioRxiv) → Ma 2022 published",
-   detail:"83-кратное увеличение OLA в Y. lipolytica. Преодоление лимитирующих шагов. Опубликован как Ma 2022 в Commun Biol.",
-   quant:[["OLA увеличение","83× (0.11 → 9.18 мг/л)"],["DOI","10.1038/s42003-022-04202-1"]],
-   tags:["literature","2021","OLA","83x","Ma2022","Y.lipolytica"]},
+   priority:"critical",
+   detail:"Главная референсная работа для DVA-пути. 87-кратное увеличение OLA (olivetolic acid, C5-аналог DVA) в Y. lipolytica. Систематическое устранение лимитирующих шагов: ACC1 OE → malonyl-CoA ↑; PTS1-таргетинг OLS → пероксисома; ylPEX10 OE → пероксисомальная функция; MAE1+ANT1 → NADPH; CaCO₃ → pH буфер. Прямой шаблон для DVA-инженерии.",
+   quant:[["OLA увеличение","87× (0.103 → 8.93 мг/л)"],["DOI","10.1038/s42003-022-04202-1"],["PMID","36494507"],["Журнал","Communications Biology"],["YL101 (базовый)","0.103 мг/л OLA"],["YL128 (финал)","8.93 мг/л OLA"],["Ключ. улучшения","ACC1 OE, PTS1, PEX10, MAE1, CaCO₃"]],
+   refs:[{doi:"10.1038/s42003-022-04202-1",pmid:"36494507",text:"Ma et al. 2022 – Commun.Biol. (главная ссылка)"},
+         {doi:"10.1101/2021.06.10.447928",text:"Ma 2021 – preprint (bioRxiv)"}],
+   notes:"Все конструкции (YL101–YL128) используют Y.lipolytica po1f. Непосредственно применимо к DVA-пути: заменить hexanoate → propionate + PCS-лигазу.",
+   tags:["literature","2021","OLA","87x","Ma2022","Y.lipolytica"]},
 
   // MED
   {id:"MED-001", label:"Среда база", type:"MED", confidence:"high",
@@ -642,15 +733,23 @@ const nodes = [
   {id:"STR-001", label:"STR-001 (DVA)", type:"STR", confidence:"medium",
    organism:"yarrowia_lipolytica", target:["DVA"], pathway:"PWY-0001",
    source:"Ma 2022 / Концепция",
-   detail:"Штамм 1 Y. lipolytica — продуцент DVA. Po1f/po1fk + OLS+OAC+ACC1. Секретирует DVA в среду → передаётся STR-002 в двухштаммовой системе.",
-   quant:[["Базовый шт.","po1f или po1fk"],["Конструкция","OLS+OAC+ACC1 (pYLXP')"],["Продукт","DVA → среда"]],
+   priority:"critical",
+   genotype:"po1f (ΔPox1-6, Δura3) + OLS (TEF1) + OAC (TEF1) + ylACC1 (hp4d) + [GEN-PTS1: OLS-SKL] + pYLXP'",
+   detail:"Штамм 1 Y. lipolytica — продуцент DVA. Po1f/po1fk + OLS+OAC+ylACC1. Секретирует DVA в среду → передаётся STR-002 в двухштаммовой системе. Оптимальный C/N 80:1, fed-batch пропионат 0.5 мМ каждые 24ч.",
+   quant:[["Базовый шт.","po1f (ΔPox1-6, Δura3) или po1fk"],["Конструкция","OLS+OAC+ylACC1 (pYLXP')"],["Продукт","DVA → секреция в среду"],["Субстрат подачи","Пропионат 0.5–2 мМ (fed-batch)"],["pH культивир.","5.5–6.0 + CaCO₃ 20 г/л"],["Прогноз DVA","50–200 мг/л (инференс из OLA)"]],
+   risks:["Нет прямых данных по STR-001 DVA-продукции — концепция на основе OLA-аналога","propionyl-CoA снабжение — ключевое узкое место","CaCO₃ буфер обязателен для поддержания pH и выхода (–430% без него)"],
+   notes:"Прототип на основе YL128 (Ma 2022). Замена гексаноат → пропионат + PCS-лигаза. Пероксисомальный таргетинг OLS (+PEX10) даёт +37% выхода.",
    tags:["strain1","DVA-producer","po1fk","co-culture"]},
 
   {id:"STR-002", label:"STR-002 (THCVA)", type:"STR", confidence:"medium",
    organism:"yarrowia_lipolytica", target:["THCVA"], pathway:"PWY-0003",
    source:"Концепция",
-   detail:"Штамм 2 Y. lipolytica — продуцент THCVA. Потребляет DVA из STR-001, добавляет CsPT4+MVA → CBGVA, затем THCAS → THCVA.",
-   quant:[["Прогноз","5–15 мг/л THCVA"],["Конструкция","CsPT4 + THCAS + MVA OE"],["Источник DVA","STR-001 (кондиционир. среда)"]],
+   priority:"critical",
+   genotype:"po1f (ΔPox1-6) + CsPT4 (TEF1, ER-таргетинг) + THCAS (секретируемая, hp4d) + tHMG1 (OE) + IDI1 (OE) + ERG20(F96W-N119W) + [↓ERG9]",
+   detail:"Штамм 2 Y. lipolytica — конвертер DVA→THCVA. Потребляет DVA из STR-001, добавляет CsPT4+MVA → CBGVA, затем THCAS → THCVA. Ключевой вызов: pH-конфликт THCAS. Стратегия — секреция THCAS во внеклеточную кислую среду (pH снижение на 2-й фазе).",
+   quant:[["Прогноз THCVA","5–15 мг/л"],["Конструкция","CsPT4 + THCAS + tHMG1 + IDI1 + ERG20-mut"],["Источник DVA","STR-001 кондиционированная среда"],["pH продукции","4.5–5.5 (2-я фаза)"],["DO контроль","30–50% (THCAS требует O₂)"],["Аналог","S.cer.: THCA до 8 мг/л (Luo 2019)"]],
+   risks:["pH 4.5–5.5 для THCAS конфликтует с ростом дрожжей — двухфазный процесс обязателен","THCAS экспрессия в Y.lipolytica не проверена — возможны проблемы с фолдингом","H₂O₂ от THCAS токсичен — нужна каталаза","ERG9 нокдаун может нарушить мембранный гомеостаз"],
+   notes:"Рассмотреть биомолекулярные конденсаты для CsPT4+THCAS (Hong 2025: 5–15× улучшение). Секреция THCAS во внеклеточную кислую среду — наиболее перспективная стратегия pH-конфликта.",
    tags:["strain2","THCVA-producer","co-culture","CsPT4","THCAS"]},
 
   {id:"ORG-001", label:"S. cerevisiae", type:"ORG", confidence:"high",
@@ -1039,6 +1138,27 @@ function confBar(c){
   return `<span class="conf-bar">${[1,2,3].map(i=>`<span class="conf-pip" style="background:${i<=n?col:"#1e293b"}"></span>`).join("")}</span> <span style="font-size:10px;color:${col}">${c||"—"}</span>`;
 }
 
+// ── Priority badge helper ──
+function priorityBadge(p){
+  if(!p) return "";
+  const map={critical:"КРИТИЧ.",high:"ВЫСОКИЙ",medium:"СРЕДНИЙ",low:"НИЗКИЙ"};
+  return `<span class="priority-badge priority-${p}">${map[p]||p}</span>`;
+}
+
+// ── Refs block helper ──
+function refsHtml(refs){
+  if(!refs||!refs.length) return "";
+  return `<div class="sec-hdr">📄 Источники</div>
+    <div class="refs-block">${refs.map(r=>{
+      const url = r.doi ? `https://doi.org/${r.doi}` : r.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${r.pmid}` : "#";
+      const id  = r.doi ? `DOI: ${r.doi}` : r.pmid ? `PMID: ${r.pmid}` : "";
+      return `<a class="ref-link" href="${url}" target="_blank">
+        <span class="ref-icon">🔗</span>
+        <span><b style="color:#93c5fd">${r.text||id}</b>${id?`<br><span style="color:#475569;font-size:9px">${id}</span>`:""}</span>
+      </a>`;
+    }).join("")}</div>`;
+}
+
 // ── Node panel ──
 function showNodePanel(d){
   const T=TYPES[d.type]; const C=T?.color||"#64748b";
@@ -1052,11 +1172,33 @@ function showNodePanel(d){
     return sid===d.id||tid===d.id;
   });
 
+  // Chemical formula row (for CMP/MET types)
+  const chemRow = (d.formula||d.mw) ? `<div class="chem-row">
+    ${d.formula?`<div class="chem-item"><span class="chem-k">Формула</span><span class="chem-v">${d.formula}</span></div>`:""}
+    ${d.mw?`<div class="chem-item"><span class="chem-k">М.м.</span><span class="chem-v">${d.mw}</span></div>`:""}
+  </div>` : "";
+
+  // Genotype block (for STR type)
+  const genotypeBlock = d.genotype ? `<div class="sec-hdr">🧬 Генотип / Конструкция</div>
+    <div class="genotype-block">${d.genotype}</div>` : "";
+
+  // Notes block
+  const notesBlock = d.notes ? `<div class="sec-hdr">💡 Примечания</div>
+    <div class="notes-block">${d.notes}</div>` : "";
+
+  // Risks block
+  const risksBlock = (d.risks&&d.risks.length) ? `<div class="sec-hdr">⚠ Риски / Узкие места</div>
+    <div class="risk-block">${d.risks.map(r=>`<div class="risk-item">${r}</div>`).join("")}</div>` : "";
+
   document.getElementById("node-body").innerHTML=`
-    <span class="card-badge" style="background:${C}20;color:${C};border:1px solid ${C}">${d.type}</span>
+    <div style="margin-bottom:8px">
+      <span class="card-badge" style="background:${C}20;color:${C};border:1px solid ${C}">${d.type}</span>
+      ${priorityBadge(d.priority)}
+    </div>
+    ${chemRow}
     <p class="card-desc">${d.detail}</p>
     <div class="card-meta">
-      <span class="card-meta-k">Organism</span>
+      <span class="card-meta-k">Организм</span>
       <span class="card-meta-v">${(d.organism||"—").replace(/_/g," ")}</span>
       <span class="card-meta-k">Target</span>
       <span class="card-meta-v">${(d.target||[]).join(", ")||"—"}</span>
@@ -1065,13 +1207,17 @@ function showNodePanel(d){
       <span class="card-meta-k">Confidence</span>
       <span class="card-meta-v">${confBar(d.confidence)}</span>
       <span class="card-meta-k">Source</span>
-      <span class="card-meta-v" style="font-size:10px;color:#475569">${d.source||"—"}</span>
+      <span class="card-meta-v" style="font-size:10px;color:#64748b">${d.source||"—"}</span>
     </div>
-    ${d.quant&&d.quant.length?`<div class="quant-block">
+    ${d.quant&&d.quant.length?`<div class="sec-hdr">📊 Количественные данные</div><div class="quant-block">
       ${d.quant.map(q=>`<div class="quant-row"><span class="quant-k">${q[0]}:</span><span class="quant-v">${q[1]}</span></div>`).join("")}
     </div>`:""}
-    <div class="tag-strip">${d.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
-    ${connected.length?`<div class="sec-hdr">Связи (${connected.length})</div>
+    ${genotypeBlock}
+    ${notesBlock}
+    ${risksBlock}
+    ${refsHtml(d.refs)}
+    <div class="tag-strip" style="margin-top:8px">${d.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+    ${connected.length?`<div class="sec-hdr">🔗 Связи (${connected.length})</div>
       ${connected.map(l=>{
         const sid=l.source.id||l.source,tid=l.target.id||l.target;
         const isOut=sid===d.id;
@@ -1103,10 +1249,24 @@ function showConnPanel(srcId,tgtId,lbl){
   function nodeBlock(n,fallId){
     if(!n) return `<div class="conn-node"><div class="conn-node-title">${fallId}</div></div>`;
     const C=TYPES[n.type]?.color||"#64748b";
+    const pBadge = n.priority ? priorityBadge(n.priority) : "";
+    const chemInfo = (n.formula||n.mw) ? `<div style="font-size:10px;color:#64748b;margin:3px 0">
+      ${n.formula?`<span style="color:#cbd5e1;font-weight:600">${n.formula}</span>`:""}
+      ${n.mw?`<span style="margin-left:8px;color:#94a3b8">${n.mw}</span>`:""}
+    </div>` : "";
+    const quantHtml = n.quant&&n.quant.length ? `<div class="quant-block" style="margin-top:6px">
+      ${n.quant.map(q=>`<div class="quant-row"><span class="quant-k">${q[0]}:</span><span class="quant-v">${q[1]}</span></div>`).join("")}
+    </div>` : "";
+    const risksHtml = n.risks&&n.risks.length ? `<div style="margin-top:5px">
+      ${n.risks.slice(0,2).map(r=>`<div class="risk-item" style="font-size:10px">${r}</div>`).join("")}
+      ${n.risks.length>2?`<div style="font-size:9px;color:#475569;padding-left:14px">+${n.risks.length-2} ещё рисков…</div>`:""}
+    </div>` : "";
     return `<div class="conn-node" style="border-color:${C}40">
-      <div class="conn-node-title" style="color:${C}">[${n.type}] ${n.label}</div>
+      <div class="conn-node-title" style="color:${C}">[${n.type}] ${n.label} ${pBadge}</div>
+      ${chemInfo}
       <div class="conn-node-desc">${n.detail}</div>
-      ${n.quant&&n.quant.length?n.quant.map(q=>`<div style="font-size:10px;margin-top:3px;color:#64748b"><b style="color:#94a3b8">${q[0]}:</b> ${q[1]}</div>`).join(""):""}
+      ${quantHtml}
+      ${risksHtml}
       <div style="margin-top:5px">${n.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
     </div>`;
   }
