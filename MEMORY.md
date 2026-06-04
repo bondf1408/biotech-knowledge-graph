@@ -14,3 +14,4 @@
 - [Cobalt additive for carotenoids](ADD-cobalt-carotenoid.md) — Cobalt as an additive to enhance carotenoid production and indirectly support cannabinoid precursor supply in Y. lipolytica
 - [Acetic acid stepwise feeding](ADD-acetic-acid-stepwise-fedbatch.md) — Stepwise acetic acid feeding strategy in fed-batch for lipid/acetyl-CoA enhancement in Y. lipolytica
 - [Pantothenate for CoA biosynthesis](ADD-pantothenate-CoA.md) — Pantothenate (vitamin B5) supplementation to enhance CoA pools and acyl-CoA precursor availability in Y. lipolytica
+- [Two-stage propionate glycerol fed-batch](ADD-two-stage-propionate-glycol-fedbatch.md) — Two-stage fed-batch with propionate and glycerol feeding for acetyl-CoA/NADPH balance and propionyl-CoA supply
