@@ -1,0 +1,13 @@
+Ma et al. 2022 supplementary resources were successfully downloaded and saved locally in A:\job\biotech.
+
+Supplementary Information (PDF):
+https://static-content.springer.com/esm/art%3A10.1038%2Fs42003-022-04202-1/MediaObjects/42003_2022_4202_MOESM2_ESM.pdf
+Saved as: Ma2022_MOESM2_ESM.pdf
+
+Supplementary Data (XLSX):
+https://static-content.springer.com/esm/art%3A10.1038%2Fs42003-022-04202-1/MediaObjects/42003_2022_4202_MOESM4_ESM.xlsx
+Saved as: Ma2022_MOESM4_ESM.xlsx
+
+Notes: PDF and XLSX files have been downloaded locally and may be used for further extraction of strain/plasmid lists and experimental tables.
+Extraction note: Supplementary Table 2 contains the full plasmid list, Supplementary Table 3 contains the full strain list, and the XLSX figures provide exact OLA titers for YL101–YL128 and pH/precursor optimization conditions.
+Created cards: STR-002, PLS-001, GEN-005.

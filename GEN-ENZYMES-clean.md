@@ -1,0 +1,54 @@
+## PMC11434003.xml
+- **mutation_pattern**: S2A
+- **mutation_pattern**: Q161R
+- **mutation_pattern**: S214H
+- **mutation_pattern**: S212A
+- **mutation_pattern**: F213S
+- **mutation_pattern**: V49C
+- **mutation_pattern**: H290D
+- **mutation_pattern**: F176D
+- **mutation_pattern**: S177T
+- **mutation_pattern**: Y288V
+- **mutation_pattern**: V47D
+- **mutation_pattern**: G286C
+- **mutation_pattern**: V47C
+- **mutation_pattern**: E214H
+- **mutation_pattern**: S5A
+- **mutation_pattern**: S5B
+- **mutation_pattern**: Y288A
+- **mutation_pattern**: G286S
+- **mutation_pattern**: A232S
+- **mutation_pattern**: Q295F
+- **mutation_pattern**: P3P
+- **mutation_pattern**: T1A
+## PMC11794439.xml
+- **mutation_pattern**: L180Y
+- **mutation_pattern**: L180F
+- **mutation_pattern**: D219A
+- **mutation_pattern**: L180A
+- **mutation_pattern**: Y222A
+- **mutation_pattern**: L176F
+- **mutation_pattern**: L176Y
+- **mutation_pattern**: Y222L
+- **mutation_pattern**: Y222F
+- **mutation_pattern**: R90E
+## PMC6362252.xml
+- **mutation_pattern**: Y288A
+- **mutation_pattern**: Y288N
+- **mutation_pattern**: G286S
+- **mutation_pattern**: F213N
+- **mutation_pattern**: A232S
+- **mutation_pattern**: Y288V
+- **mutation_pattern**: T32G
+- **mutation_pattern**: C4C
+## PMC7305150.xml
+- **mutation_pattern**: S42K
+- **mutation_pattern**: S72N
+- **mutation_pattern**: N6A
+- **mutation_pattern**: L41B
+- **mutation_pattern**: S62H
+- **mutation_pattern**: S3A
+- **mutation_pattern**: S3B
+- **mutation_pattern**: S3C
+- **mutation_pattern**: C4G
+- **mutation_pattern**: C8N

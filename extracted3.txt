@@ -1,0 +1,322 @@
+Supplementary Note 2: LC-MS characterization of OLA standards and samples
+Olivetolic Acid by LC-MS/MS
+
+For: Jingbo Ma (CBEE) January 7, 2020
+
+Report prepared by: M. LaCourse Date: January 7, 2020
+
+Report reviewed by: Joshua Wilhide Date:
+
+Objective & Solution Preparation
+
+· The goal of this analysis is to utilize LC-MS/MS to determine the olivetolic acid
+
+concentration in 3 samples
+
+· Sample and standard preparation:
+
+· Samples were analyzed as provided by transferring to autosampler vials
+
+· Sample 3 was non-homogenous and thus vortexed thoroughly before
+
+analysis but still separated quickly
+
+· A standard curve was created in methanol from the provided 10 ppm stock
+
+following the scheme below: C1 (ppb) V1 (uL) C2 (ppb) V2 (uL) Diluent (uL)
+
+10,000
+
+150 1000 1500
+
+1350
+
+10,000
+
+50
+
+500 1000
+
+950
+
+1,000
+
+250
+
+250 1000
+
+750
+
+1,000
+
+100
+
+100 1000
+
+900
+
+1,000
+
+50
+
+50 1000
+
+950
+
+1,000
+
+10
+
+10 1000
+
+990
+
+11
+
+Instrumentation & Method
+
+Instrumentation: · Qsight LX50:
+· PerkinElmer UHPLC Precision Sampling Module · Perkin Elmer UHPLC Solvent Delivery Module · PerkinElmer UHPLC Column Temperature
+Module · Perkin Elmer QSight 210 Mass Spectrometer · Column: Agilent Zorbax Eclipse XDB-C18 2.1 x 50
+mm, 1.8 m (P/N 981757-902)
+
+HPLC Method: Olivetolic Acid V1 · Injection Volume: 10.0 L · Column Temperature: 40oC · Run time: 5.00 min · Flow: 0.3 mL/min · Isocratic: (40:60 water:methanol)
+MS Method: Olivetolic Acid V1 · Drying Gas: 80.0 · HSID Temperature (oC): 320.0 · Nebulizer Gas 1: 100.0 · ElectroSpray V1 Pos: -3000.0 · Source 1 Temperature (oC): 200.0
+Olivetolic Acid (negative mode) · Q1 Mass: 223.5 · Q2 Mass: 180 · Dwell Time: 795 ms · Resolution (Q1:Q2): Unit_Unit · CE: 22, EV:-30, CCL2: 20
+
+Calibration Curve
+
+12
+
+Methanol Blank 500 ppb Olivetolic Acid Standard
+13
+
+Sample 1 Sample 2
+14
+
+Sample 3
+
+Results
+· See corresponding spreadsheet for all raw values and calculations
+· Determined concentrations: · Sample 1: 649 ppb · Sample 2: 533 ppb · Sample 3: 467 ppb
+Olivetolic Acid by MS/MS
+
+For: Jingbo Ma (CBEE) January 14, 2020
+
+Report prepared by: M. LaCourse Date: January 14, 2020
+
+Report reviewed by: Joshua Wilhide Date:
+
+15
+
+Instrumentation & Method
+Instrumentation: · Perkin Elmer QSight 210 Mass Spectrometer MS Method: · Drying Gas: 80.0 · HSID Temperature (oC): 320.0 · Nebulizer Gas 1: 100.0 · ElectroSpray V1 Pos: -3000.0 · Source 1 Temperature (oC): 0.0 Olivetolic Acid (negative mode) · CE: 22 · Fragmentation:
+· EV:- 30 · CCL2: 20
+Mass Spectrum 1 ppm Olivetolic Acid
+16
+
+Mass Spectrum 1 ppm Olivetolic Acid - Fragmentation
+
+Olivetolic Acid by High Resolution Mass Spectrometry (HRMS)
+
+For: Jingbo Ma (CBEE) January 15, 2020
+
+Report prepared by: M. LaCourse Date: January 15, 2020
+
+Report reviewed by: Joshua Wilhide Date:
+
+17
+
+Instrumentation & Method
+Instrumentation: · Bruker 12T solariX FT-ICR-MS
+MS Method: · Negative mode ESI ionization · Fragmentation with collision energy 12V
+
+0.0 150
+
+Fragmentation C12H16O4 ­ COO  C11H16O2
+
+223.09835
+Olivetolic Acid Calibration: ESI01152020_neg_08 Sample: ESI01152020_neg_09 Calculated [M-H]: 223.09758 Observed[M-H]: 223.09835 Error: 3.4 ppm Res: 182k
+313.08044
+
+255.23431
+
+283.26594
+
+239.06089
+
+295.13785
+
+365.24932
+
+325.18656
+
+349.27865
+
+339.20248
+
+393.28113 375.27839
+
+387.10041
+
+403.31003
+
+449.15422
+
+420.30062
+
+443.26701
+
+471.29848
+
+265.14962
+
+431.18827
+
+485.15158
+
+200
+
+250
+
+300
+
+350
+
+400
+
+450
+
+m/z
+
+Relative Intensity (%)
+
+18
+
+Relative Intensity (%)
+
+223.09835
+
+Olivetolic Acid Zoom
+
+Calibration: ESI01152020_neg_08
+
+Sample: ESI01152020_neg_09
+
+Calculated [M-H]: 223.09758
+
+Observed[M-H]: 223.09835
+
+Error: 3.4 ppm
+
+Res: 182k
+
+224.10198
+
+227.20277
+
+0.0
+
+220
+
+221
+
+222
+
+223
+
+224
+
+225
+
+226
+
+227
+
+228
+
+229
+
+230 m/z
+
+179.10750
+
+223.09730
+
+Olivetolic Acid Fragmentation Calibration: ESI01152020_neg_08 Sample: ESI01152020_neg_10 Calculated [M-H]: 179.107753 Observed[M-H]: 179.107501 Error: 1.4 ppm Res: 303k
+
+Relative Intensity (%)
+
+205.08699
+
+0
+
+150
+
+200
+
+250
+
+300
+
+350
+
+400
+
+450
+
+m/z
+
+19
+
+Relative Intensity (%)
+
+179.10750
+
+Olivetolic Acid Fragmentation Zoom 223.09730
+
+Calibration: ESI01152020_neg_08
+
+Sample: ESI01152020_neg_10
+
+Calculated [M-H]: 179.107753
+
+Observed[M-H]: 179.107501
+
+Error: 1.4 ppm
+
+Res: 303k
+
+224.10072
+
+180.11113
+
+205.08699
+
+0
+
+180
+
+185
+
+190
+
+195
+
+200
+
+205
+
+210
+
+215
+
+220
+
+225
+
+m/z
+
+20
+
+

@@ -1,0 +1,344 @@
+Supplementary Information for
+Biosynthesis of cannabinoid precursor olivetolic acid in genetically engineered Yarrowia lipolytica
+Jingbo Ma1,2, Yang Gu1,3 and Peng Xu1,4*
+1Department of Chemical, Biochemical and Environmental Engineering, University of Maryland, Baltimore County, Baltimore, MD 21250, USA 2Present address: College of Biological and Pharmaceutical Engineering, West Anhui University, Lu'an, Anhui 237012, China 3Present address: School of Food Science and Pharmaceutical Engineering, Nanjing Normal University, Nanjing 210023, China 4Present address: Department of Chemical Engineering, Guangdong Provincial Key Laboratory of Materials and Technologies for Energy Conversion (MATEC)Guangdong Technion-Israel Institute of Technology, Shantou, Guangdong 515063, China
+* Corresponding authors Tel: + 86-0754-88077163. E-mail: peng.xu@gtiit.edu.cn (PX).
+1
+
+Supplementary Table 1. Primers used in this study
+
+Primers
+
+Sequence
+
+CsOAC-F
+
+ccgaccagcactttttgcagtactaaccgcaggccgtgaaacaccttattgtcctc
+
+CsOAC-R
+
+ggacaggccatggaactagtcggtaccttatttacgaggggtgtagtcgaaaataag
+
+CsOLS-F
+
+ccgaccagcactttttgcagtactaaccgcagaatcacctccgggcagaagg
+
+CsOLS-R
+
+ggacaggccatggaactagtcggtaccttaatacttaatggggacgcttc
+
+CsOAC-Gly-F
+
+ggaggaggtggtggtggtggtggaggtggcatggccgtgaaacaccttattgtcctc
+
+CsOLS-Gly-R
+
+acggccatgccacctccaccaccaccaccacctcctccatacttaatggggacgcttct
+
+EcFadD-F
+
+ccgaccagcactttttgcagtactaaccgcagaagaaggtttggcttaaccgttatcc
+
+EcFadD-R
+
+ggacaggccatggaactagtcggtacctcaggctttattgtccactttgccgcgcg
+
+EcFadK-F
+
+tccgaccagcactttttgcagtactaaccgcagcatcccacaggcccgcatctcgg
+
+EcFadK-R
+
+ggacaggccatggaactagtcggtaccttattcaatctcttcacagacatc
+
+ScFAA2-F
+
+tccgaccagcactttttgcagtactaaccgcaggccgctccagattatgcacttaccg
+
+ScFAA2-R
+
+ggacaggccatggaactagtcggtaccctaaagcttttctgtcttgactag
+
+ylACC1-F
+
+tccgaccagcactttttgcagtactaaccgcagcgactgcaattgaggacactaacacg
+
+ylACC1-R
+
+ggacaggccatggaactagtcggtacctcacaaccccttgagcagctcagcccg
+
+ylACC1(S667A)-F
+
+agttagacctcttgctgacggtggtattc
+
+ylACC1(S667A)-R
+
+aataccaccgtcagcaagaggtctaactc
+
+ylACC1(S1178A)-F gtctcgagctgatgccgtctccgacttttc
+
+ylACC1(S1178A)-R aagtcggagacggcatcagctcgagacac
+
+ylFAA1-F
+
+ccgaccagcactttttgcagtactaaccgcaggtcggatacacaatttcctcaaagcc
+
+ylFAA1-R
+
+ggacaggccatggaactagtcggtaccctaagactgctcgtagcactcatcaatttc
+
+pTEF-Rvs
+
+ccggatggccagacaaagaaaca
+
+XPR2-Fw
+
+gtaaatagaaaatctggcttgtaggtggcaaaat
+
+Ku70_DwF
+
+gtccggagcggccgcGCATGCaagtcgacaCTAGGGAGGCACATCTAAACGAATAACG
+
+Ku70_DwR
+
+gttacatccttttatcagacatacctaggAGTGAACGACCAAGACTAAAGGGTG
+
+ku70_UpF
+
+ccctaaatttgatgaaagcctaggCGACTTGATGTTTAGAGTGTCCAGATCC
+
+ku70_UpR
+
+taatgtatgctatacgaagttatTTTCAAAAAGCGGCGGTTCGTG
+
+ku70_ChkF
+
+GCCAAGTTCTCTTTCCCCTACATG
+
+ku70_ChkR
+
+CTTCAGTAACTGGGCCCACGC
+
+YliC05907-UpF
+
+tggcatccctaaatttgatgaaagcctaggACAGTTCTCTTCTCCTTGTTGAGATATAC
+
+YliC05907-UpR
+
+acttcgtataatgtatgctatacgaagttatGGTGGAGTCATGTGAATTGAGCGCGGTG
+
+YliC05907-DwF
+
+cgtccggagcggccgcGCATGCaagtcgacAGAGTATAGTAATGTATTATTTGCTTAGG
+
+YliC05907-DwR
+
+cctatgttacatccttttatcagacatacctaggCCGAACCAAGGAGATGATCAAGTCC
+
+YliC05907-ChkF
+
+ATTGCCGAGATTTCCGCAAAAACCTGAAG
+
+YliC05907-ChkR
+
+AAGAACAAGACCGACAACCTGCCTGTTGG
+
+YliDGA1_DwF
+
+gctagcgagacaataacggaggaGGAAAACTGCCTGGGTTAGGCAAAT
+
+YliDGA1_DwR
+
+atcagacatagcggccgcTCTCTGATGGCCTGGAGCGAG
+
+YliDGA1_UpF
+
+aatttgatgaaaggcggccgcATGCTGCGGGCGGATCCTGG
+
+YliDGA1_UpR
+
+tgtatgctatacgaagttatAGCTTTTGTTTTGTGTGACTTGTCTGT
+
+YliDGA1_ChkF
+
+GTTTATGCATTCTGTTGGACCTTAGTCTG
+
+YliDGA1_ChkR
+
+GTTATCTACCACGATTTTTTGGTTTCTGAGGC
+
+2
+
+YliDGA2_DwF YliDGA2_DwR YliDGA2_UpF YliDGA2_UpR YliDGA2_ChkF YliDGA2_ChkR ylPEX10-F ylPEX10-R EcLpdA-F EcLpdA-R EcAceF-F EcAceF-R EcAceE-F EcAceE-R EcLplA-F EcLplA-R ylMAE1-F ylMAE1-R ylANT1-F ylANT1-R
+
+gctagcgagacaataacggaggaCATAACACTCATCAGTAGCCTTTACAGTGAT ccttttatcagacatagcggccgcTTGCTCTTGTAATTCCATAGATAATATATACGAAA aaatttgatgaaaggcggccgcCTTGGGAGTGTATTTGGAAAATGACTTGG tgtatgctatacgaagttatTTTGCGGGCGGTACGGGTACA CTATCGCCCCAAAGTGTTTCTAGCA GAGATGGCATGCCAACGTTGAC tccgaccagcactttttgcagtactaaccgcagtggggaagttcacatgcattcgctgg ggacaggccatggaactagtcggtaccttatctgataggcaacaagttctgctctc ccgaccagcactttttgcagtactaaccgcagagtactgaaatcaaaactcaggtc GGACAGGCCATGGAACTAGTCGGTACCTTACTTCTTCTTCGCTTTCGGGT ccgaccagcactttttgcagtactaaccgcaggctatcgaaatcaaagtaccggac GGACAGGCCATGGAACTAGTCGGTACCTTACATCACCAGACGGCGAATGTC ccgaccagcactttttgcagtactaaccgcagtcagaacgtttcccaaatgacgtg ggacaggccatggaactagtcggtaccttacgccagacgcgggttaactt ccgaccagcactttttgcagtactaaccgcagtccacattacgcctgctcatctc GGACAGGCCATGGAACTAGTCGGTACCCTACCTTACAGCCCCCGCCATCCATG ccgaccagcactttttgcagtactaaccgcagttacgactacgaaccatgcgaccc GGACAGGCCATGGAACTAGTCGGTACCCTAGTCGTAATCCCGCACATGGATG tccgaccagcactttttgcagtactaaccgcaggcagctatttccaaagactatgttc ggacaggccatggaactagtcggtaccttatcccttgatcaaggtgggggccttcatg
+
+3
+
+Supplementary Table 2. Plasmids used in this study
+
+Plasmids
+
+Characteristics
+
+pYaliA1 vector backbone with leucine marker and Ampicillin
+
+pYLXP'
+
+resistance gene
+
+pYLXP'-CsOLS
+
+pYLXP' containing gene CsOLS
+
+pYLXP'-CsOAC
+
+pYLXP' containing gene CsOAC
+
+pYLXP'-CsOLS-CsOAC
+
+pYLXP' containing gene CsOLS and CsOAC
+
+pYLXP'-CsOLS-Gly-CsOAC
+
+pYLXP' containing gene CsOLS and CsOAC with Glycine linker
+
+pYLXP'-CsOAC-Gly-CsOLS
+
+pYLXP' containing gene CsOAC and CsOLS with Glycine linker
+
+pYLXP'-CsAAE1
+
+pYLXP' containing gene CsAAE1
+
+pYLXP'-CsAAE3
+
+pYLXP' containing gene CsAAE3
+
+pYLXP'-EcFadD
+
+pYLXP' containing gene EcFadD
+
+pYLXP'-EcFadK
+
+pYLXP' containing gene EcFadK
+
+pYLXP'-ScFAA2
+
+pYLXP' containing gene ScFAA2
+
+pYLXP'-ylFAA1
+
+pYLXP' containing gene ylFAA1
+
+pYLXP'-PpLvaE
+
+pYLXP' containing gene PpLvaE
+
+pYLXP'-CsOLS-CsOAC-CsAAE1
+
+pYLXP' containing gene CsOLS, CsOAC and CsAAE1
+
+pYLXP'-CsOLS-CsOAC-CsAAE3
+
+pYLXP' containing gene CsOLS, CsOAC and CsAAE3
+
+pYLXP'-CsOLS-CsOAC-EcFadD
+
+pYLXP' containing gene CsOLS, CsOAC and EcFadD
+
+pYLXP'-CsOLS-CsOAC-EcFadK
+
+pYLXP' containing gene CsOLS, CsOAC and EcFadK
+
+pYLXP'-CsOLS-CsOAC-ScFAA2
+
+pYLXP' containing gene CsOLS, CsOAC and ScFAA2
+
+pYLXP'-CsOLS-CsOAC-ylFAA1
+
+pYLXP' containing gene CsOLS, CsOAC and ylFAA1
+
+pYLXP'-CsOLS-CsOAC-PpLvaE
+
+pYLXP' containing gene CsOLS, CsOAC and PpLvaE
+
+pYLXP'-ylACC1
+
+pYLXP' containing gene ylACC1
+
+pYLXP'-ylACC1S667A
+
+pYLXP' containing gene ylACC1S667A
+
+pYLXP'-ylACC1S667A,S1178A
+
+pYLXP' containing gene ylACC1S667A,S1178A
+
+pYLXP'-CsOLS-CsOAC-PpLvaE-ylACC1
+
+pYLXP' containing gene CsOLS, CsOAC, PpLvaE and ylACC1
+
+pYLXP' containing gene CsOLS, CsOAC, PpLvaE and
+
+pYLXP'-CsOLS-CsOAC-PpLvaE-ylACC1S667A,S1178A ylACC1S667A,S1178A
+
+pYLXP'-ylPEX10
+
+pYLXP' containing gene ylPEX10
+
+pYLXP'-SeACSL641P
+
+pYLXP' containing gene SeACSL641P
+
+pYLXP'-EcPDH-EcLplA
+
+pYLXP' containing gene EcPDH and EcLplA
+
+pYLXP' containing gene ylPEX10, SeACSL641P, EcPDH and
+
+pYLXP'-ylPEX10-SeACSL641P-EcPDH-EcLplA
+
+EcLplA
+
+pYLXP'-ylMAE1-ylANT1-McMAE2
+
+pYLXP' containing gene ylMAE1, ylANT1 and McMAE2
+
+pYLXP'-ylPEX10-SeACSL641P-EcPDH-EcLplA-ylM pYLXP' containing gene ylPEX10, SeACSL641P, EcPDH, EcLplA,
+
+AE1-ylANT1-McMAE2
+
+ylMAE1, ylANT1 and McMAE2
+
+pYLXP'-loxP-ura
+
+pYLXP'containing the loxP-URA-loxP cassette
+
+pYLXP'-loxP-hygr
+
+pYLXP'containing the loxP-hygr-loxP cassette
+
+pYLXP'-Cre
+
+pYLXP'containing gene Cre
+
+pURLA
+
+Ku70 site integration plasmid
+
+pURLB
+
+YALI0C05907g site integration plasmid
+
+4
+
+pYLXP'-loxP-ura-ylDGA2 pYLXP'-loxP-hygr-ylDGA1 pURLA-CsOLS-CsOAC-PpLvaE-ylACC1 pURLB-CsOLS-CsOAC-PpLvaE-ylACC1
+
+pYLXP'-loxP-ura containing gene ylDGA2 deletion cassette pYLXP'-loxP-hygr containing gene ylDGA1 deletion cassette pURLA containing gene CsOLS, CsOAC, PpLvaE and ylACC1 pURLB containing gene CsOLS, CsOAC, PpLvaE and ylACC1
+
+NOTE: Cs, Cannabis sativa; Ec, Escherichia coli; Sc, Saccharomyces cerevisiae; yl, Yarrowia lipolytica; Pp, Pseudomonas putida KT2440; Se, Salmonella enterica; Mc, Mucor circinelloides.
+
+5
+
+
