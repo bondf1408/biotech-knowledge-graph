@@ -190,6 +190,9 @@ svg { width: 100vw; height: 100vh; }
 .link { stroke-opacity: 0.35; cursor: pointer; transition: stroke-opacity .15s; }
 .link.sel-link { stroke-opacity: 1; stroke-width: 3; }
 .link.dimmed { stroke-opacity: 0.05 !important; }
+/* Пунктирные авто-связи из .md файлов */
+.link.auto-link { stroke-dasharray: 7,5; stroke-opacity: 0.25; }
+.link.auto-link.dimmed { stroke-opacity: 0.03 !important; }
 .node circle { stroke-width: 1.5; cursor: pointer; }
 .node circle:hover { stroke-width: 3; }
 .node text { pointer-events: none; fill: #ffffff; font-size: 10px; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
@@ -197,6 +200,14 @@ svg { width: 100vw; height: 100vh; }
 .node.highlighted circle { stroke-width: 3.5; filter: drop-shadow(0 0 6px currentColor) brightness(1.35); }
 .node.selected circle { stroke-width: 3.5; filter: drop-shadow(0 0 8px currentColor); }
 .node.searched circle { stroke-width: 4; filter: brightness(1.5); }
+/* Изолированные узлы — нет связей */
+.node.isolated circle { stroke-dasharray: 4,3; opacity: 0.55; }
+.node.isolated text { opacity: 0.5; }
+/* Drag: основной узел + спутники */
+.node.drag-primary circle   { filter: drop-shadow(0 0 10px #60a5fa) brightness(1.4); }
+.node.drag-satellite circle { filter: drop-shadow(0 0 6px #60a5fa) brightness(1.2); stroke-dasharray: 3,2; }
+/* Пиннутые — маленький маркер */
+.node.pinned circle { stroke-width: 2.5; }
 
 /* ── Auto-expand toggle ── */
 .toggle-wrap {
@@ -218,6 +229,74 @@ svg { width: 100vw; height: 100vh; }
 }
 .toggle-switch input:checked + .toggle-slider { background:#1e3a5f; border-color:#3b82f6; }
 .toggle-switch input:checked + .toggle-slider::before { transform:translateX(13px); background:#60a5fa; }
+
+/* ── Settings panel ── */
+#settings-panel {
+  position:fixed; right:0; top:46px; z-index:250; width:220px;
+  background:rgba(10,18,36,0.97); border:1px solid #1e293b;
+  border-right:none; border-radius:8px 0 0 8px;
+  padding:10px 12px; transform:translateX(105%); transition:transform .25s ease;
+  max-height:calc(100vh - 60px); overflow-y:auto;
+}
+#settings-panel.open { transform:translateX(0); }
+.sett-sec { margin-bottom:10px; }
+.sett-hdr { font-size:9px; font-weight:800; color:#334155; text-transform:uppercase;
+  letter-spacing:.07em; margin:6px 0 5px; }
+.sett-row { display:flex; align-items:center; gap:6px; margin-bottom:5px; }
+.sett-row > label { font-size:10px; color:#94a3b8; width:78px; flex-shrink:0; }
+.sett-row input[type=range] { flex:1; accent-color:#3b82f6; height:4px; cursor:pointer; }
+.sett-val { font-size:10px; color:#60a5fa; width:34px; text-align:right; flex-shrink:0; }
+.sett-sep { height:1px; background:#1e293b; margin:7px 0; }
+.layout-btn {
+  flex:1; padding:5px 4px; border-radius:5px; border:1px solid #334155;
+  font-size:10px; font-weight:700; cursor:pointer; background:#0f172a; color:#64748b;
+  transition:all .15s; text-align:center; line-height:1.3;
+}
+.layout-btn.active { background:#1e3a5f; border-color:#3b82f6; color:#60a5fa; }
+.layout-btn:hover:not(.active) { border-color:#475569; color:#94a3b8; }
+.sett-btn {
+  flex:1; padding:4px 6px; border-radius:5px; border:1px solid #334155;
+  font-size:10px; font-weight:700; cursor:pointer; background:#0f172a; color:#64748b;
+  transition:all .15s;
+}
+.sett-btn:hover { border-color:#475569; color:#94a3b8; background:#1e293b; }
+#saved-badge { font-size:9px; color:#22c55e; opacity:0; transition:opacity .4s; display:inline-block; }
+#saved-badge.show { opacity:1; }
+#settings-toggle-btn {
+  padding:2px 9px; border-radius:20px; border:1.5px solid #334155;
+  font-size:10px; font-weight:700; cursor:pointer; background:transparent;
+  color:#475569; transition:all .15s; flex-shrink:0;
+}
+#settings-toggle-btn.open { border-color:#3b82f6; color:#60a5fa; background:#0c1a30; }
+
+/* ── Source file links ── */
+.src-files { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px; }
+.src-file-link {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:10px; color:#60a5fa; text-decoration:none;
+  background:#0c1a30; border:1px solid #1e3a5f; border-radius:4px;
+  padding:3px 8px; transition:background .12s, color .12s;
+  cursor:pointer; white-space:nowrap;
+}
+.src-file-link:hover { background:#1e3a5f; color:#93c5fd; }
+.src-file-copy {
+  cursor:pointer; font-size:10px; color:#334155; background:#0f172a;
+  border:1px solid #1e293b; border-radius:3px; padding:2px 6px;
+  margin-left:2px; transition:color .1s, background .1s;
+}
+.src-file-copy:hover { color:#94a3b8; background:#1e293b; }
+.src-file-toast {
+  display:inline-block; font-size:9px; color:#22c55e;
+  margin-left:4px; opacity:0; transition:opacity .3s;
+}
+.src-file-toast.show { opacity:1; }
+
+/* ── Card readability ── */
+.card-divider { border:none; border-top:1px solid #1e293b; margin:8px 0; }
+.conn-count-badge {
+  display:inline-block; font-size:9px; color:#64748b; background:#1e293b;
+  border-radius:3px; padding:1px 5px; margin-left:5px; vertical-align:middle;
+}
 </style>
 </head>
 <body>
@@ -229,6 +308,12 @@ svg { width: 100vw; height: 100vh; }
   <input type="text" id="search" placeholder="Поиск...">
   <div class="sep"></div>
   <span id="hint">Клик = карточка · Ctrl+Клик = выделение · Scroll = зум</span>
+  <button id="isolated-btn" onclick="toggleIsolated()" title="Показать узлы без связей"
+    style="padding:2px 9px;border-radius:20px;border:1.5px solid #334155;font-size:10px;
+           font-weight:700;cursor:pointer;background:transparent;color:#475569;transition:all .15s">
+    ○ Изолир.
+  </button>
+  <button id="settings-toggle-btn" onclick="toggleSettings()">⚙ Раскладка</button>
   <label class="toggle-wrap" title="Автоматически раскрывать все секции карточки">
     <span class="toggle-label">Раскрыть всё</span>
     <div class="toggle-switch">
@@ -241,8 +326,10 @@ svg { width: 100vw; height: 100vh; }
 <div id="sel-tray">
   <b id="sel-count">0</b> выбрано
   <div id="sel-chips"></div>
+  <button onclick="arrangeSelected()" title="Выстроить выделенные в столбик (2 столбика шахматно если >5)">⫳ Столбик</button>
   <button onclick="openCompare()">Сравнить</button>
-  <button onclick="clearSelection()">✕ Очистить</button>
+  <button onclick="unpinSelected()" title="Открепить выделенные">📌</button>
+  <button onclick="clearSelection()">✕</button>
 </div>
 
 <!-- Node card -->
@@ -277,7 +364,74 @@ svg { width: 100vw; height: 100vh; }
 
 <div class="legend" id="legend"></div>
 <div id="zoom-info">—</div>
+<div id="settings-panel">
+  <div class="sett-sec">
+    <div class="sett-hdr">Раскладка</div>
+    <div class="sett-row">
+      <button class="layout-btn" id="btn-layout-A" onclick="applyLayout('A')">🧬 A: Хребет</button>
+      <button class="layout-btn active" id="btn-layout-C" onclick="applyLayout('C')">→ C: Поток</button>
+    </div>
+  </div>
+  <div class="sett-sep"></div>
+  <div class="sett-sec">
+    <div class="sett-hdr">Физика</div>
+    <div class="sett-row">
+      <label>Отталкивание</label>
+      <input type="range" id="s-rep" min="-1500" max="-30" step="10" value="-280"
+        oninput="updateRepulsion(+this.value)">
+      <span class="sett-val" id="s-rep-v">-280</span>
+    </div>
+    <div class="sett-row">
+      <label>Дист. связей</label>
+      <input type="range" id="s-dist" min="20" max="400" step="5" value="100"
+        oninput="updateLinkDist(+this.value)">
+      <span class="sett-val" id="s-dist-v">100</span>
+    </div>
+    <div class="sett-row">
+      <label>Зон. притяж.</label>
+      <input type="range" id="s-clust" min="0" max="0.12" step="0.005" value="0.04"
+        oninput="updateCluster(+this.value)">
+      <span class="sett-val" id="s-clust-v">0.040</span>
+    </div>
+  </div>
+  <div class="sett-sep"></div>
+  <div class="sett-sec">
+    <div class="sett-hdr">Отображение</div>
+    <div class="sett-row">
+      <label>Авто-связи</label>
+      <input type="checkbox" id="s-auto" checked onchange="setAutoLinks(this.checked)">
+    </div>
+    <div class="sett-row">
+      <label>Заморозить</label>
+      <input type="checkbox" id="s-freeze" onchange="setFreeze(this.checked)">
+    </div>
+  </div>
+  <div class="sett-sep"></div>
+  <div class="sett-row">
+    <button class="sett-btn" onclick="sim.alpha(0.6).restart()">▶ Встряхнуть</button>
+    <button class="sett-btn" onclick="unpinAll()" title="Освободить все вручную пиннутые узлы">📌 Открепить</button>
+  </div>
+  <div class="sett-row" style="margin-top:4px">
+    <button class="sett-btn" onclick="resetPositions()" style="color:#94a3b8">↺ Сбросить раскладку</button>
+  </div>
+  <div class="sett-sep"></div>
+  <div class="sett-hdr">Сохранить в файл</div>
+  <div class="sett-row">
+    <button class="sett-btn" onclick="exportLayout()" title="Скачать раскладку в JSON">⬇ Экспорт</button>
+    <button class="sett-btn" onclick="document.getElementById('import-file').click()" title="Загрузить раскладку из JSON">⬆ Импорт</button>
+    <input type="file" id="import-file" accept=".json" style="display:none"
+      onchange="importLayout(this.files[0])">
+  </div>
+  <div style="text-align:center;margin-top:5px;font-size:9px;color:#334155;line-height:1.5">
+    позиции авто-сохраняются&nbsp;<span id="saved-badge">✓</span><br>
+    <span style="color:#475569">drag = один · Alt+drag = со спутниками · Ctrl+клик = выделить · 2× клик = открепить</span>
+  </div>
+</div>
+
 <svg id="graph"></svg>
+
+<!-- Авто-обогащение из build_graph.py (если файл существует) -->
+<script src="graph_enrichment.js" onerror="console.info('graph_enrichment.js не найден — запустите build_graph.py')"></script>
 
 <script>
 // ══════════════════════════════════════════════════════════════════════════════
@@ -937,6 +1091,383 @@ const links = [
   {s:"TER-squalene",t:"ENZ-ERG20",  lbl:"использует MVA",w:1},
 ];
 
+// ── Применить обогащение из graph_enrichment.js ───────────────────────────
+(function applyEnrichment(){
+  if (typeof GRAPH_ENRICHMENT === "undefined") return;
+  const sf = GRAPH_ENRICHMENT.sourceFiles || {};
+  nodes.forEach(n => {
+    if (sf[n.id]) {
+      n.source_files = (n.source_files || []).concat(
+        sf[n.id].filter(f => !(n.source_files || []).includes(f))
+      );
+    }
+  });
+  const existingIds = new Set(nodes.map(n => n.id));
+  (GRAPH_ENRICHMENT.newNodes || []).forEach(n => {
+    if (!existingIds.has(n.id)) { nodes.push(n); existingIds.add(n.id); }
+  });
+  (GRAPH_ENRICHMENT.newLinks || []).forEach(l => links.push(l));
+  console.info(`[enrichment] +${(GRAPH_ENRICHMENT.newNodes||[]).length} узлов, `+
+    `${Object.keys(sf).length} file-маппингов`);
+})();
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LAYOUTS & STATE
+// ══════════════════════════════════════════════════════════════════════════════
+const LS_PREFIX = 'biotech_graph_v2_';
+let currentLayout = 'C';
+let clusterStrength = 0.04;
+let linkDistMult = 1.0;
+let repulsionVal = -280;
+let showAutoLinks = true;
+let frozen = false;
+
+// Позиции относительно центра экрана (cx, cy)
+const LAYOUTS = {
+  A: {
+    name: "А: Хребет + Зоны",
+    desc: "Целевые продукты закреплены по вертикали, узлы притягиваются к своим зонам по типу",
+    // Фиксированные позиции ключевых узлов (смещение от центра экрана)
+    fixed: {
+      "THCVA":         {fx:   0, fy:-220},
+      "CBGVA":         {fx:   0, fy:  -0},
+      "DVA":           {fx:   0, fy: 210},
+      "ENZ-THCS":      {fx: 185, fy:-250},
+      "ENZ-CsPT4":     {fx: 185, fy:  -0},
+      "ENZ-OLS":       {fx: 185, fy: 205},
+      "ENZ-OAC":       {fx: 265, fy: 250},
+      "propionyl-CoA": {fx:-210, fy: 270},
+      "malonyl-CoA":   {fx:-210, fy: 150},
+      "GPP":           {fx: 340, fy:  50},
+      "acetyl-CoA":    {fx:-290, fy:  40},
+      "ENZ-ACC1":      {fx:-290, fy:-100},
+      "OLA":           {fx: 185, fy: 300},
+      "STR-001":       {fx:-350, fy: 140},
+      "STR-002":       {fx: 360, fy:-240},
+      "PWY-0001":      {fx: -90, fy: 320},
+      "PWY-0002":      {fx:  95, fy: -90},
+      "PWY-0003":      {fx:  95, fy:-210},
+      "PWY-0004":      {fx: 315, fy: 155},
+      "ENZ-ERG20":     {fx: 310, fy: 240},
+    },
+    // Центры притяжения по типу (смещение от центра экрана)
+    typeCenters: {
+      CMP:{x:0,   y:0},   MET:{x:-190,y:160},  ENZ:{x:185, y:0},
+      GEN:{x:-390,y:-200},PWY:{x:80,  y:50},   ADD:{x:-510,y:290},
+      LIT:{x:490, y:-320},MED:{x:-210,y:410},  STR:{x:-350,y:110},
+      ORG:{x:490, y:210}, TER:{x:490, y:390},  PRO:{x:210, y:410},
+      PLS:{x:-90, y:-420},
+    },
+  },
+  C: {
+    name: "С: Pathway-поток",
+    desc: "Путь синтеза идёт горизонтально, поддерживающие узлы сверху и снизу",
+    fixed: {
+      "propionyl-CoA": {fx:-490, fy:  30},
+      "malonyl-CoA":   {fx:-430, fy: 105},
+      "acetyl-CoA":    {fx:-430, fy:-100},
+      "ENZ-ACC1":      {fx:-340, fy:-100},
+      "ENZ-OLS":       {fx:-310, fy:   0},
+      "ENZ-OAC":       {fx:-215, fy:   0},
+      "DVA":           {fx: -85, fy:   0},
+      "GPP":           {fx:  45, fy:  85},
+      "ENZ-ERG20":     {fx: 140, fy: 150},
+      "ENZ-CsPT4":     {fx: 150, fy:   0},
+      "CBGVA":         {fx: 300, fy:   0},
+      "ENZ-THCS":      {fx: 430, fy:   0},
+      "THCVA":         {fx: 570, fy:   0},
+      "OLA":           {fx:-210, fy:  85},
+      "STR-001":       {fx:-200, fy:-220},
+      "STR-002":       {fx: 430, fy:-190},
+      "PWY-0001":      {fx:-210, fy: 190},
+      "PWY-0002":      {fx: 210, fy: 190},
+      "PWY-0003":      {fx: 430, fy: 190},
+      "PWY-0004":      {fx: 140, fy: 250},
+    },
+    typeCenters: {
+      CMP:{x:0,   y:0},   MET:{x:0,   y:85},   ENZ:{x:0,   y:0},
+      GEN:{x:-100,y:-245},PWY:{x:0,   y:190},  ADD:{x:-210,y:290},
+      LIT:{x:410, y:-290},MED:{x:160, y:330},  STR:{x:60,  y:-245},
+      ORG:{x:-460,y:-245},TER:{x:570, y:290},  PRO:{x:360, y:330},
+      PLS:{x:-360,y:-245},
+    },
+  },
+};
+
+// ── localStorage ──────────────────────────────────────────────────────────────
+function lsKey(){ return LS_PREFIX + currentLayout; }
+
+function saveGraphState(){
+  // Сохраняем ТОЛЬКО пиннутые узлы (fx/fy != null) — это то что пользователь явно зафиксировал
+  const pins = {};
+  nodes.forEach(n => {
+    if(n.fx != null && n.fy != null){
+      pins[n.id] = {fx:Math.round(n.fx), fy:Math.round(n.fy)};
+    }
+  });
+  try {
+    localStorage.setItem(lsKey(), JSON.stringify({
+      pins, repulsion:repulsionVal,
+      linkDist:linkDistMult, cluster:clusterStrength, showAuto:showAutoLinks
+    }));
+    const b = document.getElementById('saved-badge');
+    if(b){ b.classList.add('show'); setTimeout(()=>b.classList.remove('show'), 1400); }
+  } catch(e){}
+}
+
+// Кэш дефолтных раскладок из graph_layout.json (если файл существует в репо)
+let DEFAULT_LAYOUTS = null;
+
+function loadLayoutState(){
+  // 1. localStorage — личные настройки посетителя (приоритет)
+  try {
+    const raw = localStorage.getItem(lsKey());
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && (parsed.pins || parsed.positions)) return parsed;
+    }
+  } catch(e){}
+  // 2. Дефолт из graph_layout.json (файл рядом с HTML в репо)
+  if(DEFAULT_LAYOUTS && DEFAULT_LAYOUTS[currentLayout]){
+    return DEFAULT_LAYOUTS[currentLayout];
+  }
+  return {};
+}
+
+// ── Экспорт/импорт раскладки в файл (переживает любые пересоздания) ──────────
+function exportLayout(){
+  // Сохраняем все пины ВСЕХ раскладок + текущие настройки UI
+  const payload = {
+    version: 2,
+    exported: new Date().toISOString(),
+    activeLayout: currentLayout,
+    layouts: {},
+    settings: {
+      repulsion: repulsionVal,
+      linkDist:  linkDistMult,
+      cluster:   clusterStrength,
+      showAuto:  showAutoLinks,
+    },
+  };
+  // Все доступные раскладки
+  Object.keys(LAYOUTS).forEach(key => {
+    try {
+      const raw = localStorage.getItem(LS_PREFIX + key);
+      if(raw) payload.layouts[key] = JSON.parse(raw);
+    } catch(e){}
+  });
+  // Текущая раскладка — берём прямо из узлов (даже если ещё не сохранилось)
+  const pins = {};
+  nodes.forEach(n => {
+    if(n.fx != null && n.fy != null){
+      pins[n.id] = {fx:Math.round(n.fx), fy:Math.round(n.fy)};
+    }
+  });
+  payload.layouts[currentLayout] = {
+    ...payload.layouts[currentLayout],
+    pins,
+    repulsion: repulsionVal,
+    linkDist:  linkDistMult,
+    cluster:   clusterStrength,
+    showAuto:  showAutoLinks,
+  };
+  // Скачиваем как файл
+  // Имя файла = graph_layout.json — чтобы после копирования рядом с HTML
+  // он автоматически подхватился через fetch при загрузке страницы.
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = 'graph_layout.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importLayout(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      if(!payload || !payload.layouts){
+        alert("Файл не похож на сохранённую раскладку графа");
+        return;
+      }
+      // Записываем все раскладки в localStorage
+      Object.entries(payload.layouts).forEach(([key, data]) => {
+        try { localStorage.setItem(LS_PREFIX + key, JSON.stringify(data)); }
+        catch(err){}
+      });
+      // Переключаемся на активную раскладку из файла
+      const target = payload.activeLayout && LAYOUTS[payload.activeLayout]
+        ? payload.activeLayout : currentLayout;
+      applyLayout(target);
+      const cnt = Object.keys(payload.layouts).length;
+      alert(`Импортировано раскладок: ${cnt}. Активна: ${target}`);
+    } catch(err){
+      alert("Ошибка чтения файла: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── Позиционирование узлов ────────────────────────────────────────────────────
+function applyLayoutPositions(state){
+  const layout = LAYOUTS[currentLayout];
+  const cx = window.innerWidth/2, cy = window.innerHeight/2;
+  const savedPins = state.pins || {};
+  // 1. Закрепить ключевые узлы раскладки
+  nodes.forEach(n => {
+    const fp = layout.fixed[n.id];
+    if(fp){
+      n.fx = cx+fp.fx; n.fy = cy+fp.fy;
+      n.x = n.fx; n.y = n.fy;
+    } else {
+      n.fx = null; n.fy = null;
+    }
+  });
+  // 2. Восстановить пользовательские пины (приоритет над раскладкой)
+  nodes.forEach(n => {
+    if(savedPins[n.id]){
+      n.fx = savedPins[n.id].fx;
+      n.fy = savedPins[n.id].fy;
+      n.x = n.fx; n.y = n.fy;
+    }
+  });
+}
+
+// ── Кластерная сила ───────────────────────────────────────────────────────────
+function makeClusterForce(){
+  const layout = LAYOUTS[currentLayout];
+  const α = clusterStrength;
+  return function(){
+    const cx = window.innerWidth/2, cy = window.innerHeight/2;
+    nodes.forEach(n => {
+      if(n.fx != null) return; // пропустить закреплённые
+      const tc = layout.typeCenters[n.type] || {x:0,y:0};
+      n.vx += (cx + tc.x - n.x) * α;
+      n.vy += (cy + tc.y - n.y) * α;
+    });
+  };
+}
+
+// ── Переключение раскладки ────────────────────────────────────────────────────
+function applyLayout(key){
+  if(!LAYOUTS[key]) return;
+  currentLayout = key;
+  document.querySelectorAll('.layout-btn').forEach(b =>
+    b.classList.toggle('active', b.id === 'btn-layout-' + key));
+
+  const state = loadLayoutState();
+  // Восстановить ползунки если есть
+  if(state.repulsion !== undefined){ repulsionVal = state.repulsion; _syncSlider('s-rep','s-rep-v',repulsionVal,v=>v); }
+  if(state.linkDist  !== undefined){ linkDistMult = state.linkDist;  _syncSlider('s-dist','s-dist-v',Math.round(linkDistMult*100),v=>v); }
+  if(state.cluster   !== undefined){ clusterStrength = state.cluster; _syncSlider('s-clust','s-clust-v',clusterStrength,v=>v.toFixed(3)); }
+
+  applyLayoutPositions(state);
+
+  if(typeof sim !== 'undefined'){
+    sim.force("charge", d3.forceManyBody().strength(repulsionVal));
+    sim.force("link").distance(d => d.auto ? 220*linkDistMult : (130-d.weight*18)*linkDistMult);
+    sim.force("cluster", makeClusterForce());
+    sim.alpha(0.75).restart();
+  }
+  if(typeof nodeSel !== 'undefined') refreshPinnedClass();
+}
+
+function _syncSlider(inputId, valId, val, fmt){
+  const el = document.getElementById(inputId);
+  const vl = document.getElementById(valId);
+  if(el) el.value = val;
+  if(vl) vl.textContent = fmt ? fmt(val) : val;
+}
+
+// ── Контролы настроек ─────────────────────────────────────────────────────────
+let settingsOpen = false;
+function toggleSettings(){
+  settingsOpen = !settingsOpen;
+  document.getElementById('settings-panel').classList.toggle('open', settingsOpen);
+  document.getElementById('settings-toggle-btn').classList.toggle('open', settingsOpen);
+}
+
+function updateRepulsion(v){
+  repulsionVal = v;
+  document.getElementById('s-rep-v').textContent = v;
+  sim.force("charge", d3.forceManyBody().strength(v));
+  sim.alpha(0.3).restart();
+  saveGraphState();
+}
+
+function updateLinkDist(v){
+  linkDistMult = v/100;
+  document.getElementById('s-dist-v').textContent = v;
+  sim.force("link").distance(d => d.auto ? 220*linkDistMult : (130-d.weight*18)*linkDistMult);
+  sim.alpha(0.35).restart();
+  saveGraphState();
+}
+
+function updateCluster(v){
+  clusterStrength = v;
+  document.getElementById('s-clust-v').textContent = (+v).toFixed(3);
+  sim.force("cluster", makeClusterForce());
+  sim.alpha(0.3).restart();
+  saveGraphState();
+}
+
+function setAutoLinks(show){
+  showAutoLinks = show;
+  linkSel.style("display", l => (!show && l.auto) ? "none" : null);
+  saveGraphState();
+}
+
+function setFreeze(freeze){
+  frozen = freeze;
+  if(freeze) sim.stop(); else sim.alpha(0.1).restart();
+}
+
+function resetPositions(){
+  try { localStorage.removeItem(lsKey()); } catch(e){}
+  applyLayoutPositions({});
+  if(typeof nodeSel !== 'undefined') refreshPinnedClass();
+  sim.alpha(0.9).restart();
+}
+
+// ── Попытаться загрузить graph_layout.json (дефолт из репозитория) ───────────
+// Синхронно через XHR — D3 ещё не запустился, можем подождать.
+(function loadDefaultLayoutsSync(){
+  try {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'graph_layout.json', false); // sync
+    xhr.send(null);
+    if(xhr.status === 200 || xhr.status === 0){
+      const payload = JSON.parse(xhr.responseText);
+      if(payload && payload.layouts){
+        DEFAULT_LAYOUTS = payload.layouts;
+        // Активная раскладка из файла — если у посетителя ещё ничего не сохранено
+        const hasLocal = Object.keys(LAYOUTS).some(k => localStorage.getItem(LS_PREFIX + k));
+        if(!hasLocal && payload.activeLayout && LAYOUTS[payload.activeLayout]){
+          currentLayout = payload.activeLayout;
+        }
+        console.info('[layout] загружен дефолт graph_layout.json:',
+          Object.keys(payload.layouts).join(', '));
+      }
+    }
+  } catch(e){
+    // Файл просто не существует — это нормально
+  }
+})();
+
+// ── Применить начальные позиции ДО создания симуляции ────────────────────────
+(function initPositions(){
+  const state = loadLayoutState();
+  // Восстановить глобальные параметры
+  if(state.repulsion !== undefined) repulsionVal    = state.repulsion;
+  if(state.linkDist  !== undefined) linkDistMult    = state.linkDist;
+  if(state.cluster   !== undefined) clusterStrength = state.cluster;
+  if(state.showAuto  !== undefined) showAutoLinks   = state.showAuto;
+  applyLayoutPositions(state);
+})();
+
 // ══════════════════════════════════════════════════════════════════════════════
 // D3 GRAPH
 // ══════════════════════════════════════════════════════════════════════════════
@@ -959,20 +1490,37 @@ svg.on("click", e => {
 });
 
 const nodeMap = new Map(nodes.map(n => [n.id, n]));
-const processedLinks = links.map(l => ({source:l.s, target:l.t, label:l.lbl, weight:l.w||1}))
+const processedLinks = links.map(l => ({source:l.s, target:l.t, label:l.lbl, weight:l.w||1, auto:l.auto||false}))
   .filter(l => nodeMap.has(l.source) && nodeMap.has(l.target));
 
+// Соседи и количество связей для drag-satellites
+const nodeNeighbors = new Map(nodes.map(n => [n.id, new Set()]));
+const nodeConnCount = new Map(nodes.map(n => [n.id, 0]));
+processedLinks.forEach(l => {
+  const s = l.source.id || l.source, t = l.target.id || l.target;
+  nodeNeighbors.get(s)?.add(t);
+  nodeNeighbors.get(t)?.add(s);
+  nodeConnCount.set(s, (nodeConnCount.get(s)||0)+1);
+  nodeConnCount.set(t, (nodeConnCount.get(t)||0)+1);
+});
+
 const sim = d3.forceSimulation(nodes)
-  .force("link", d3.forceLink(processedLinks).id(d=>d.id).distance(d=>130-d.weight*18).strength(0.5))
-  .force("charge", d3.forceManyBody().strength(-280))
+  .force("link", d3.forceLink(processedLinks).id(d=>d.id)
+    .distance(d => d.auto ? 220*linkDistMult : (130-d.weight*18)*linkDistMult)
+    .strength(d => d.auto ? 0.08 : 0.5))
+  .force("charge", d3.forceManyBody().strength(repulsionVal))
   .force("center", d3.forceCenter(W/2, H/2))
-  .force("collision", d3.forceCollide(d=>TYPES[d.type].r+8));
+  .force("collision", d3.forceCollide(d=>(TYPES[d.type]||TYPES.GEN).r+8))
+  .force("cluster", makeClusterForce())
+  // Физика быстро затухает — узлы не "плавают" бесконечно
+  .alphaDecay(0.05)
+  .alphaMin(0.005);
 
 const linkG = g.append("g");
 const linkSel = linkG.selectAll("line").data(processedLinks).enter().append("line")
-  .attr("class","link")
+  .attr("class", d => d.auto ? "link auto-link" : "link")
   .attr("stroke", d => { const t=nodeMap.get(d.target.id||d.target); return t?TYPES[t.type]?.color+"80":"#33415580"; })
-  .attr("stroke-width", d=>Math.max(d.weight, 2))
+  .attr("stroke-width", d => d.auto ? 1.5 : Math.max(d.weight, 2))
   .on("click",(e,d)=>{
     e.stopPropagation();
     const sid=d.source.id||d.source, tid=d.target.id||d.target;
@@ -987,19 +1535,145 @@ const nodeG = g.append("g");
 const nodeSel = nodeG.selectAll(".node").data(nodes).enter().append("g")
   .attr("class","node")
   .call(d3.drag()
-    .on("start",(e,d)=>{if(!e.active)sim.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y;})
-    .on("drag", (e,d)=>{d.fx=e.x;d.fy=e.y;})
-    .on("end",  (e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;})
+    .on("start", dragStarted)
+    .on("drag",  dragged)
+    .on("end",   dragEnded)
   )
-  .on("click",(e,d)=>{ if(e.ctrlKey||e.metaKey){e.preventDefault();toggleSelect(d);}else{showNodePanel(d);} });
+  .on("click",(e,d)=>{ if(e.ctrlKey||e.metaKey){e.preventDefault();toggleSelect(d);}else{showNodePanel(d);} })
+  .on("dblclick",(e,d)=>{
+    e.stopPropagation();
+    // Двойной клик — открепить (даже ключевые)
+    d.fx = null; d.fy = null;
+    d3.select(e.currentTarget).classed("pinned", false);
+    sim.alpha(0.4).restart();
+    saveGraphState();
+  });
+
+// ── Drag: тянем узел + спутников ──────────────────────────────────────────────
+let dragSatellites = []; // [{node, dx0, dy0}, ...] — спутники с их начальными смещениями
+let dragLonely = false;
+
+function findSatellites(d){
+  // Спутники = соседи у которых: меньший грейд (радиус) И мало связей
+  const dRadius = (TYPES[d.type]||TYPES.GEN).r;
+  const dConnections = nodeConnCount.get(d.id) || 0;
+  const satellites = [];
+  (nodeNeighbors.get(d.id) || []).forEach(nid => {
+    const n = nodeMap.get(nid);
+    if(!n || n === d) return;
+    const nR = (TYPES[n.type]||TYPES.GEN).r;
+    const nC = nodeConnCount.get(nid) || 0;
+    if(nR <= dRadius && nC <= Math.max(3, dConnections - 2)){
+      satellites.push(n);
+    }
+  });
+  return satellites;
+}
+
+function dragStarted(e, d){
+  if(!e.active) sim.alphaTarget(0.3).restart();
+  d.fx = d.x; d.fy = d.y;
+
+  // Поведение:
+  // - Если узел в multi-select → тащим всю выделенную группу как ригид (одна дельта)
+  // - Иначе Alt+drag → тащим со спутниками (равноудалённое позиционирование)
+  // - Иначе обычный drag → только сам узел
+  const isMulti  = selectedIds.has(d.id) && selectedIds.size > 1;
+  const wantGroup = !isMulti && e.sourceEvent && e.sourceEvent.altKey;
+
+  if(isMulti){
+    // Multi-select: все выделенные двигаются вместе с одной дельтой
+    dragSatellites = [...selectedIds]
+      .filter(id => id !== d.id)
+      .map(id => nodeMap.get(id))
+      .filter(Boolean)
+      .map(n => ({
+        node: n,
+        dx0: (n.x ?? 0) - d.x,
+        dy0: (n.y ?? 0) - d.y,
+        anchors: [],   // ригидное смещение, без блендинга
+      }));
+    dragSatellites.forEach(s => { s.node.fx = s.node.x; s.node.fy = s.node.y; });
+    nodeSel.classed("drag-satellite", n => dragSatellites.some(s => s.node === n));
+  } else if(wantGroup){
+    dragSatellites = findSatellites(d).map(s => {
+      const otherAnchors = [];
+      (nodeNeighbors.get(s.id) || []).forEach(nid => {
+        if(nid === d.id) return;
+        const an = nodeMap.get(nid);
+        if(an) otherAnchors.push(an);
+      });
+      return {
+        node:    s,
+        dx0:    (s.x ?? 0) - d.x,
+        dy0:    (s.y ?? 0) - d.y,
+        anchors: otherAnchors,
+      };
+    });
+    dragSatellites.forEach(s => { s.node.fx = s.node.x; s.node.fy = s.node.y; });
+    nodeSel.classed("drag-satellite", n => dragSatellites.some(s => s.node === n));
+  } else {
+    dragSatellites = [];
+  }
+  nodeSel.classed("drag-primary", n => n === d);
+}
+
+function dragged(e, d){
+  d.fx = e.x; d.fy = e.y;
+  dragSatellites.forEach(s => {
+    // Позиция-кандидат "относительно тянущегося" — сохраняет исходную форму подграфа
+    const fromDrag = { x: e.x + s.dx0, y: e.y + s.dy0 };
+    if(!s.anchors.length){
+      // Нет других якорей — просто следуем за тянущимся
+      s.node.fx = fromDrag.x;
+      s.node.fy = fromDrag.y;
+    } else {
+      // Средняя позиция других соседей спутника
+      let ax = 0, ay = 0;
+      s.anchors.forEach(an => { ax += (an.x ?? 0); ay += (an.y ?? 0); });
+      ax /= s.anchors.length; ay /= s.anchors.length;
+      // Целевая точка спутника — посередине между тянущимся и средним якорем
+      // (т.е. равноудалённость от обоих "родителей")
+      s.node.fx = (fromDrag.x + ax) / 2;
+      s.node.fy = (fromDrag.y + ay) / 2;
+    }
+  });
+}
+
+function dragEnded(e, d){
+  if(!e.active) sim.alphaTarget(0);
+  d.fx = d.x; d.fy = d.y;
+  dragSatellites.forEach(s => { s.node.fx = s.node.x; s.node.fy = s.node.y; });
+  nodeSel.classed("drag-satellite", false);
+  nodeSel.classed("drag-primary",   false);
+  dragSatellites = [];
+  refreshPinnedClass();
+  saveGraphState();
+}
+
+// Обновить визуальный маркер пиннутых узлов
+function refreshPinnedClass(){
+  nodeSel.classed("pinned", n => n.fx != null && n.fy != null);
+}
+
+// Открепить все вручную перетащенные узлы (кроме ключевых раскладки)
+function unpinAll(){
+  const layout = LAYOUTS[currentLayout];
+  nodes.forEach(n => {
+    if(!layout.fixed[n.id]){ n.fx = null; n.fy = null; }
+  });
+  refreshPinnedClass();
+  sim.alpha(0.7).restart();
+  saveGraphState();
+}
 
 nodeSel.append("circle")
-  .attr("r", d=>TYPES[d.type].r)
-  .attr("fill", d=>TYPES[d.type].color+"25")
-  .attr("stroke", d=>TYPES[d.type].color);
+  .attr("r", d=>(TYPES[d.type]||TYPES.GEN).r)
+  .attr("fill", d=>(TYPES[d.type]||TYPES.GEN).color+"25")
+  .attr("stroke", d=>(TYPES[d.type]||TYPES.GEN).color);
 
 nodeSel.append("text").attr("text-anchor","middle")
-  .attr("dy", d=>TYPES[d.type].r+11).text(d=>d.label);
+  .attr("dy", d=>(TYPES[d.type]||TYPES.GEN).r+11).text(d=>d.label);
 
 sim.on("tick",()=>{
   linkSel.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y)
@@ -1009,11 +1683,19 @@ sim.on("tick",()=>{
 
 // ── Legend ──
 const legend = document.getElementById("legend");
-legend.innerHTML = '<div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:5px;">Типы</div>';
+legend.innerHTML = '<div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:5px;">Типы<br><span style="font-weight:400;color:#334155;font-size:9px">клик = скрыть · Shift+клик = выделить всё</span></div>';
 Object.entries(TYPES).forEach(([k,v])=>{
-  legend.innerHTML += `<div class="legend-item" onclick="toggleType('${k}')">
+  legend.innerHTML += `<div class="legend-item" onclick="onLegendClick(event,'${k}')" title="Shift+клик чтобы выделить все узлы этого типа">
     <div class="legend-dot" style="background:${v.color}"></div><span>${v.label}</span></div>`;
 });
+function onLegendClick(e, k){
+  if(e.shiftKey){ selectAllOfType(k); }
+  else { toggleType(k); }
+}
+function selectAllOfType(type){
+  nodes.forEach(n => { if(n.type === type) selectedIds.add(n.id); });
+  updateSelection();
+}
 
 // ── Filter buttons ──
 const hiddenTypes = new Set();
@@ -1041,6 +1723,32 @@ function applyDim(){
   });
 }
 
+// ── Изолированные узлы ──────────────────────────────────────────────────────
+const connectedIds = new Set();
+processedLinks.forEach(l => {
+  connectedIds.add(l.source.id||l.source);
+  connectedIds.add(l.target.id||l.target);
+});
+const isolatedIds = new Set(nodes.map(n=>n.id).filter(id => !connectedIds.has(id)));
+
+let isolatedMode = false;
+function toggleIsolated(){
+  isolatedMode = !isolatedMode;
+  const btn = document.getElementById("isolated-btn");
+  if(isolatedMode){
+    btn.style.borderColor="#f59e0b"; btn.style.color="#fcd34d"; btn.style.background="#1c1200";
+    btn.textContent=`● Изолир. (${isolatedIds.size})`;
+    nodeSel.classed("isolated", d => isolatedIds.has(d.id));
+    nodeSel.classed("dimmed", d => hiddenTypes.has(d.type) || !isolatedIds.has(d.id));
+    linkSel.classed("dimmed", true);
+  } else {
+    btn.style.borderColor="#334155"; btn.style.color="#475569"; btn.style.background="transparent";
+    btn.textContent="○ Изолир.";
+    nodeSel.classed("isolated", false);
+    applyDim();
+  }
+}
+
 // ── Search ──
 document.getElementById("search").addEventListener("input",e=>{
   const q=e.target.value.toLowerCase().trim();
@@ -1063,6 +1771,55 @@ function clearSelection(){
   selectedIds.clear();
   updateSelection();
   closePanel("cmp");
+}
+
+// Открепить только выделенные
+function unpinSelected(){
+  if(!selectedIds.size) return;
+  selectedIds.forEach(id => {
+    const n = nodeMap.get(id);
+    if(n){ n.fx = null; n.fy = null; }
+  });
+  refreshPinnedClass();
+  sim.alpha(0.3).restart();
+  saveGraphState();
+}
+
+// Выстроить выделенные в столбик (1 или 2 шахматно если >5)
+function arrangeSelected(){
+  if(selectedIds.size < 2) return;
+  const sel = [...selectedIds].map(id => nodeMap.get(id)).filter(Boolean);
+  // Сортируем по текущей Y, чтобы порядок был интуитивный
+  sel.sort((a,b) => (a.y ?? 0) - (b.y ?? 0));
+  // Центр масс — куда выстраиваем
+  const cx = sel.reduce((s,n)=>s+(n.x??0),0) / sel.length;
+  const cy = sel.reduce((s,n)=>s+(n.y??0),0) / sel.length;
+  const SPACING_Y = 55;
+  const SPACING_X = 110;
+  const twoCol = sel.length > 5;
+  if(!twoCol){
+    // Один столбик
+    const totalH = SPACING_Y * (sel.length - 1);
+    sel.forEach((n, i) => {
+      n.fx = cx;
+      n.fy = cy - totalH/2 + i * SPACING_Y;
+      n.x  = n.fx; n.y = n.fy;
+    });
+  } else {
+    // Два столбика в шахматном порядке: 0→L, 1→R, 2→L, 3→R...
+    const rows = Math.ceil(sel.length / 2);
+    const totalH = SPACING_Y * (rows - 1);
+    sel.forEach((n, i) => {
+      const isRight = i % 2 === 1;
+      const row = Math.floor(i / 2);
+      n.fx = cx + (isRight ? SPACING_X/2 : -SPACING_X/2);
+      n.fy = cy - totalH/2 + row * SPACING_Y;
+      n.x  = n.fx; n.y = n.fy;
+    });
+  }
+  refreshPinnedClass();
+  sim.alpha(0.25).restart();
+  saveGraphState();
 }
 function updateSelection(){
   nodeSel.classed("selected",n=>selectedIds.has(n.id));
@@ -1237,6 +1994,31 @@ function priorityBadge(p){
   return `<span class="priority-badge priority-${p}">${map[p]||p}</span>`;
 }
 
+// ── Source files helper ──
+function getFileUrl(relPath){
+  // Строим абсолютный URL относительно расположения HTML-файла
+  return window.location.href.replace(/\/[^\/]*(\?.*)?$/, '/') + relPath;
+}
+function copyPath(btn, fullPath){
+  navigator.clipboard.writeText(fullPath).then(()=>{
+    const toast = btn.nextElementSibling;
+    if(toast){ toast.classList.add("show"); setTimeout(()=>toast.classList.remove("show"),1500); }
+  }).catch(()=>{ prompt("Путь к файлу:", fullPath); });
+}
+function srcFilesHtml(d){
+  if(!d.source_files || !d.source_files.length) return "";
+  return '<div class="src-files">' +
+    d.source_files.map(f => {
+      const url   = getFileUrl(f);
+      const fname = f.split('/').pop();
+      const full  = window.location.href.replace(/\/[^\/]*(\?.*)?$/, '/') + f;
+      return `<a class="src-file-link" href="${url}" target="_blank" title="Открыть: ${f}">📄 ${fname}</a>`+
+             `<button class="src-file-copy" onclick="copyPath(this,'${full.replace(/'/g,"\\'")}')" title="Скопировать путь">📋</button>`+
+             `<span class="src-file-toast">✓</span>`;
+    }).join('') +
+  '</div>';
+}
+
 // ── Refs block helper ──
 function refsHtml(refs){
   if(!refs||!refs.length) return "";
@@ -1263,6 +2045,8 @@ function showNodePanel(d){
     const sid=l.source.id||l.source,tid=l.target.id||l.target;
     return sid===d.id||tid===d.id;
   });
+
+  const srcFiles = srcFilesHtml(d);
 
   // ── Always-visible section ──
   const chemRow = (d.formula||d.mw) ? `<div class="chem-row">
@@ -1296,10 +2080,12 @@ function showNodePanel(d){
     </div>` : "";
 
   document.getElementById("node-body").innerHTML=`
-    <div style="margin-bottom:8px">
+    <div style="margin-bottom:8px;display:flex;align-items:center;flex-wrap:wrap;gap:4px">
       <span class="card-badge" style="background:${C}20;color:${C};border:1px solid ${C}">${d.type}</span>
       ${priorityBadge(d.priority)}
+      <span class="conn-count-badge">${connected.length} связ.</span>
     </div>
+    ${srcFiles}
     ${chemRow}
     <p class="card-desc">${d.detail}</p>
     <div class="card-meta">
@@ -1314,6 +2100,7 @@ function showNodePanel(d){
       <span class="card-meta-k">Source</span>
       <span class="card-meta-v" style="font-size:10px;color:#64748b">${d.source||"—"}</span>
     </div>
+    <hr class="card-divider">
     ${expandBtn}
     ${extraSection}
     <div class="tag-strip" style="margin-top:6px">${d.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
@@ -1397,6 +2184,32 @@ function showConnPanel(srcId,tgtId,lbl){
   document.getElementById("conn-panel").style.display="block";
   applyAutoExpand("conn-body");
 }
+
+// ── Bootstrap: синхронизировать UI с загруженным состоянием ──────────────────
+(function bootstrap(){
+  // Слайдеры
+  _syncSlider('s-rep',   's-rep-v',   repulsionVal,                v => v);
+  _syncSlider('s-dist',  's-dist-v',  Math.round(linkDistMult*100),v => v);
+  _syncSlider('s-clust', 's-clust-v', clusterStrength,             v => (+v).toFixed(3));
+  // Авто-связи
+  if(!showAutoLinks){
+    const cb = document.getElementById('s-auto');
+    if(cb) cb.checked = false;
+    linkSel.style("display", l => l.auto ? "none" : null);
+  }
+  // Подсветить активную кнопку раскладки
+  const activeBtn = document.getElementById('btn-layout-' + currentLayout);
+  if(activeBtn){
+    document.querySelectorAll('.layout-btn').forEach(b=>b.classList.remove('active'));
+    activeBtn.classList.add('active');
+  }
+  // Перезапустить с правильными силами
+  sim.force("charge", d3.forceManyBody().strength(repulsionVal));
+  sim.force("link").distance(d => d.auto ? 220*linkDistMult : (130-d.weight*18)*linkDistMult);
+  sim.force("cluster", makeClusterForce());
+  refreshPinnedClass();
+  sim.alpha(0.4);
+})();
 </script>
 </body>
 </html>
