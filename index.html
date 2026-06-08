@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Biotech Knowledge Graph — DVA / CBGVA / THCVA</title>
+<title>Biotech Knowledge Graph</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -291,6 +291,101 @@ svg { width: 100vw; height: 100vh; }
 }
 .src-file-toast.show { opacity:1; }
 
+/* ── Workspace tabs ── */
+.ws-tabs { display:flex; gap:2px; flex-wrap:wrap; align-items:center; }
+.ws-tab {
+  padding:2px 10px; border-radius:20px; border:1.5px solid #334155;
+  font-size:10px; font-weight:700; cursor:pointer;
+  background:transparent; color:#475569; transition:all .15s; white-space:nowrap;
+}
+.ws-tab.active { background:#0c1a30; border-color:#3b82f6; color:#93c5fd; }
+.ws-tab:hover:not(.active) { border-color:#475569; color:#64748b; background:#1e293b20; }
+/* ── Workspace empty placeholder ── */
+#ws-empty {
+  display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+  align-items:center; justify-content:center; z-index:100; pointer-events:none;
+}
+#ws-empty-box {
+  background:rgba(15,23,42,0.93); border:1px solid #334155;
+  border-radius:12px; padding:32px 48px; text-align:center;
+}
+.ws-empty-title { font-size:18px; color:#60a5fa; font-weight:700; margin-bottom:10px; }
+.ws-empty-sub { font-size:12px; color:#475569; line-height:1.7; }
+/* ── Hidden workspace nodes/links ── */
+.ws-hidden { display:none !important; }
+
+/* ── Timeline panel ── */
+#timeline-panel {
+  position:fixed; top:45px; right:12px; z-index:210;
+  width:290px; max-height:calc(100vh - 60px);
+  background:rgba(10,18,36,0.98); border:1px solid #334155;
+  border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,0.6);
+  display:none; flex-direction:column; overflow:hidden;
+}
+#timeline-panel.open { display:flex; }
+.tl-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:9px 12px; border-bottom:1px solid #1e293b; flex-shrink:0;
+}
+.tl-header-title { font-size:11px; font-weight:700; color:#94a3b8; }
+.tl-header-close {
+  background:none; border:none; color:#475569; font-size:12px;
+  cursor:pointer; padding:2px 5px; border-radius:4px;
+}
+.tl-header-close:hover { color:#94a3b8; background:#1e293b; }
+.tl-body { overflow-y:auto; flex:1; }
+.tl-reset {
+  padding:7px 12px; font-size:10px; color:#475569; cursor:pointer;
+  border-bottom:1px solid #1e293b; transition:background .12s;
+  display:flex; align-items:center; gap:6px;
+}
+.tl-reset:hover, .tl-reset.active { background:#1e293b; color:#94a3b8; }
+.tl-entry {
+  display:flex; align-items:center; gap:6px;
+  padding:5px 12px; cursor:pointer; transition:background .12s;
+  border-left:2px solid transparent;
+}
+.tl-entry:hover { background:#0f1e36; }
+.tl-entry.active { background:#0c1a30; border-left-color:#3b82f6; }
+.tl-date { font-size:10px; color:#64748b; width:84px; flex-shrink:0; }
+.tl-bar { height:4px; background:#3b82f6; border-radius:2px; min-width:2px; }
+.tl-count { font-size:10px; color:#3b82f6; font-weight:700; margin-left:auto; flex-shrink:0; }
+.tl-details {
+  padding:6px 12px 8px 22px; background:#060f1e;
+  border-bottom:1px solid #1e293b;
+}
+.tl-total { font-size:10px; color:#334155; margin-bottom:5px; }
+.tl-section-title { font-size:9px; font-weight:700; color:#475569; margin:5px 0 3px; }
+.tl-node {
+  font-size:10px; padding:2px 0; cursor:pointer; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis; transition:opacity .12s;
+}
+.tl-node:hover { opacity:0.7; }
+.tl-empty { padding:24px 12px; font-size:11px; color:#334155; text-align:center; }
+/* GitHub commit layer */
+.tl-gh-status { font-size:9px; color:#334155; flex:1; text-align:right; margin-right:6px; white-space:nowrap; }
+.tl-commit { display:flex; align-items:baseline; gap:5px; padding:2px 0; cursor:pointer; transition:opacity .12s; }
+.tl-commit:hover { opacity:0.7; }
+.tl-commit-sha { color:#3b82f6; font-family:monospace; font-size:9px; flex-shrink:0; text-decoration:underline dotted; }
+.tl-commit-msg { color:#475569; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:9px; }
+.tl-commit-detail { padding:2px 0 4px 10px; border-left:1px solid #1e293b; margin:1px 0; min-height:0; }
+.tl-gh-only { padding:5px 12px 8px 22px; background:#060f1e; border-bottom:1px solid #1e293b; }
+.tl-gh-only-hdr { font-size:9px; font-weight:700; color:#1e293b; margin-bottom:4px; }
+/* Timeline filter classes */
+.timeline-hidden { display:none !important; }
+@keyframes tl-pulse {
+  0%,100% { opacity:1; }
+  50%      { opacity:0.55; }
+}
+.node.timeline-new circle { stroke-width:3.5px; animation:tl-pulse 1.4s ease-in-out infinite; }
+/* Timeline toggle button */
+#timeline-toggle-btn {
+  padding:2px 9px; border-radius:20px; border:1.5px solid #334155;
+  font-size:10px; font-weight:700; cursor:pointer; background:transparent;
+  color:#475569; transition:all .15s; flex-shrink:0;
+}
+#timeline-toggle-btn.open { border-color:#3b82f6; color:#60a5fa; background:#0c1a30; }
+
 /* ── Card readability ── */
 .card-divider { border:none; border-top:1px solid #1e293b; margin:8px 0; }
 .conn-count-badge {
@@ -302,7 +397,13 @@ svg { width: 100vw; height: 100vh; }
 <body>
 
 <div id="controls">
-  <h1>🧬 DVA/CBGVA/THCVA Graph</h1>
+  <h1>🧬 Biotech Graph</h1>
+  <div class="ws-tabs">
+    <button class="ws-tab active" data-ws="cannabinoid" onclick="switchWorkspace('cannabinoid')">🌿 Каннабиноиды</button>
+    <button class="ws-tab" data-ws="carotenoid" onclick="switchWorkspace('carotenoid')">🧡 Каротиноиды</button>
+    <button class="ws-tab" data-ws="foaming" onclick="switchWorkspace('foaming')">🧫 Пенообразование</button>
+  </div>
+  <div class="sep"></div>
   <div class="btn-group" id="filter-btns"></div>
   <div class="sep"></div>
   <input type="text" id="search" placeholder="Поиск...">
@@ -313,6 +414,7 @@ svg { width: 100vw; height: 100vh; }
            font-weight:700;cursor:pointer;background:transparent;color:#475569;transition:all .15s">
     ○ Изолир.
   </button>
+  <button id="timeline-toggle-btn" onclick="toggleTimeline()">📅 История</button>
   <button id="settings-toggle-btn" onclick="toggleSettings()">⚙ Раскладка</button>
   <label class="toggle-wrap" title="Автоматически раскрывать все секции карточки">
     <span class="toggle-label">Раскрыть всё</span>
@@ -425,6 +527,28 @@ svg { width: 100vw; height: 100vh; }
   <div style="text-align:center;margin-top:5px;font-size:9px;color:#334155;line-height:1.5">
     позиции авто-сохраняются&nbsp;<span id="saved-badge">✓</span><br>
     <span style="color:#475569">drag = один · Alt+drag = со спутниками · Ctrl+клик = выделить · 2× клик = открепить</span>
+  </div>
+</div>
+
+<!-- Timeline panel -->
+<div id="timeline-panel">
+  <div class="tl-header">
+    <span class="tl-header-title">📅 История</span>
+    <span id="tl-gh-status" class="tl-gh-status"></span>
+    <button class="tl-header-close" onclick="closeTimeline()">✕</button>
+  </div>
+  <div class="tl-body">
+    <div id="timeline-list"></div>
+  </div>
+</div>
+
+<!-- Workspace empty placeholder -->
+<div id="ws-empty">
+  <div id="ws-empty-box">
+    <div class="ws-empty-title" id="ws-empty-title">Рабочая область пуста</div>
+    <div class="ws-empty-sub">Добавьте .md карточки с полем<br>
+      <code style="background:#1e293b;padding:2px 6px;border-radius:3px;color:#93c5fd">workspace: ...</code><br>
+      и запустите build_graph.py</div>
   </div>
 </div>
 
@@ -1111,11 +1235,18 @@ const links = [
     `${Object.keys(sf).length} file-маппингов`);
 })();
 
+// ── Присвоить workspace и базовую дату всем хардкодным узлам ──────────────────
+nodes.forEach(n => {
+  if (!n.workspace)   n.workspace   = "cannabinoid";
+  if (!n.date_added)  n.date_added  = "2026-05-31";
+});
+
 // ══════════════════════════════════════════════════════════════════════════════
 // LAYOUTS & STATE
 // ══════════════════════════════════════════════════════════════════════════════
 const LS_PREFIX = 'biotech_graph_v2_';
 let currentLayout = 'C';
+let currentWorkspace = 'cannabinoid';
 let clusterStrength = 0.04;
 let linkDistMult = 1.0;
 let repulsionVal = -280;
@@ -1195,7 +1326,7 @@ const LAYOUTS = {
 };
 
 // ── localStorage ──────────────────────────────────────────────────────────────
-function lsKey(){ return LS_PREFIX + currentLayout; }
+function lsKey(){ return LS_PREFIX + currentWorkspace + '_' + currentLayout; }
 
 function saveGraphState(){
   // Сохраняем ТОЛЬКО пиннутые узлы (fx/fy != null) — это то что пользователь явно зафиксировал
@@ -1249,10 +1380,10 @@ function exportLayout(){
       showAuto:  showAutoLinks,
     },
   };
-  // Все доступные раскладки
+  // Все доступные раскладки (текущей рабочей области)
   Object.keys(LAYOUTS).forEach(key => {
     try {
-      const raw = localStorage.getItem(LS_PREFIX + key);
+      const raw = localStorage.getItem(LS_PREFIX + currentWorkspace + '_' + key);
       if(raw) payload.layouts[key] = JSON.parse(raw);
     } catch(e){}
   });
@@ -1293,9 +1424,9 @@ function importLayout(file){
         alert("Файл не похож на сохранённую раскладку графа");
         return;
       }
-      // Записываем все раскладки в localStorage
+      // Записываем все раскладки в localStorage (текущей рабочей области)
       Object.entries(payload.layouts).forEach(([key, data]) => {
-        try { localStorage.setItem(LS_PREFIX + key, JSON.stringify(data)); }
+        try { localStorage.setItem(LS_PREFIX + currentWorkspace + '_' + key, JSON.stringify(data)); }
         catch(err){}
       });
       // Переключаемся на активную раскладку из файла
@@ -1390,6 +1521,62 @@ function toggleSettings(){
   document.getElementById('settings-toggle-btn').classList.toggle('open', settingsOpen);
 }
 
+// ── Переключение рабочей области (вкладки) ────────────────────────────────────
+function switchWorkspace(ws){
+  if(ws === currentWorkspace) return;
+  // Сохранить текущее состояние
+  saveGraphState();
+
+  currentWorkspace = ws;
+
+  // Обновить кнопки вкладок
+  document.querySelectorAll('.ws-tab').forEach(b =>
+    b.classList.toggle('active', b.dataset.ws === ws));
+
+  // Показать/скрыть узлы и связи по workspace
+  if(typeof nodeSel !== 'undefined'){
+    nodeSel.classed("ws-hidden", n => n.workspace !== ws);
+    linkSel.classed("ws-hidden", l => {
+      const sn = nodeMap.get(l.source.id || l.source);
+      const tn = nodeMap.get(l.target.id || l.target);
+      return (sn?.workspace !== ws) || (tn?.workspace !== ws);
+    });
+
+    // Сбросить фильтры и выделения
+    hiddenTypes.clear();
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('inactive'));
+    if(typeof selectedIds !== 'undefined') selectedIds.clear();
+    document.getElementById('sel-tray').style.display = 'none';
+    document.getElementById('search').value = '';
+    nodeSel.classed("searched", false).classed("highlighted", false).classed("selected", false);
+    linkSel.classed("dimmed", false).classed("sel-link", false);
+    applyDim();
+
+    // Восстановить позиции для этой области и перезапустить симуляцию
+    const state = loadLayoutState();
+    if(state.repulsion !== undefined){ repulsionVal = state.repulsion; _syncSlider('s-rep','s-rep-v',repulsionVal,v=>v); }
+    if(state.linkDist  !== undefined){ linkDistMult = state.linkDist;  _syncSlider('s-dist','s-dist-v',Math.round(linkDistMult*100),v=>v); }
+    if(state.cluster   !== undefined){ clusterStrength = state.cluster; _syncSlider('s-clust','s-clust-v',clusterStrength,v=>v.toFixed(3)); }
+    applyLayoutPositions(state);
+    sim.alpha(0.6).restart();
+  }
+
+  // Сбросить фильтр таймлайна при смене воркспейса
+  if(typeof timelineSelectedDate !== 'undefined' && timelineSelectedDate){
+    selectTimelineDate(null);
+  }
+  if(typeof timelineOpen !== 'undefined' && timelineOpen) renderTimeline();
+
+  // Показать заглушку если область пуста
+  const empty = !nodes.some(n => n.workspace === ws);
+  const el = document.getElementById('ws-empty');
+  el.style.display = empty ? 'flex' : 'none';
+
+  // Обновить плейсхолдер под текущую область
+  const wsNames = { cannabinoid:'Каннабиноиды', carotenoid:'Каротиноиды', foaming:'Пенообразование' };
+  document.getElementById('ws-empty-title').textContent = `${wsNames[ws]||ws} — рабочая область пуста`;
+}
+
 function updateRepulsion(v){
   repulsionVal = v;
   document.getElementById('s-rep-v').textContent = v;
@@ -1444,7 +1631,7 @@ function resetPositions(){
       if(payload && payload.layouts){
         DEFAULT_LAYOUTS = payload.layouts;
         // Активная раскладка из файла — если у посетителя ещё ничего не сохранено
-        const hasLocal = Object.keys(LAYOUTS).some(k => localStorage.getItem(LS_PREFIX + k));
+        const hasLocal = Object.keys(LAYOUTS).some(k => localStorage.getItem(LS_PREFIX + currentWorkspace + '_' + k));
         if(!hasLocal && payload.activeLayout && LAYOUTS[payload.activeLayout]){
           currentLayout = payload.activeLayout;
         }
@@ -1693,7 +1880,7 @@ function onLegendClick(e, k){
   else { toggleType(k); }
 }
 function selectAllOfType(type){
-  nodes.forEach(n => { if(n.type === type) selectedIds.add(n.id); });
+  nodes.forEach(n => { if(n.type === type && n.workspace === currentWorkspace) selectedIds.add(n.id); });
   updateSelection();
 }
 
@@ -1714,12 +1901,13 @@ function toggleType(k,btn){
   applyDim();
 }
 function applyDim(){
-  nodeSel.classed("dimmed",d=>hiddenTypes.has(d.type));
+  nodeSel.classed("dimmed",d=>d.workspace===currentWorkspace&&hiddenTypes.has(d.type));
   linkSel.classed("dimmed",false);
   linkSel.style("opacity",d=>{
-    const st=nodeMap.get(d.source.id||d.source)?.type;
-    const tt=nodeMap.get(d.target.id||d.target)?.type;
-    return(hiddenTypes.has(st)||hiddenTypes.has(tt))?0.02:null;
+    const sn=nodeMap.get(d.source.id||d.source);
+    const tn=nodeMap.get(d.target.id||d.target);
+    if(sn?.workspace!==currentWorkspace||tn?.workspace!==currentWorkspace) return null;
+    return(hiddenTypes.has(sn?.type)||hiddenTypes.has(tn?.type))?0.02:null;
   });
 }
 
@@ -1738,8 +1926,8 @@ function toggleIsolated(){
   if(isolatedMode){
     btn.style.borderColor="#f59e0b"; btn.style.color="#fcd34d"; btn.style.background="#1c1200";
     btn.textContent=`● Изолир. (${isolatedIds.size})`;
-    nodeSel.classed("isolated", d => isolatedIds.has(d.id));
-    nodeSel.classed("dimmed", d => hiddenTypes.has(d.type) || !isolatedIds.has(d.id));
+    nodeSel.classed("isolated", d => d.workspace===currentWorkspace&&isolatedIds.has(d.id));
+    nodeSel.classed("dimmed", d => d.workspace===currentWorkspace&&(hiddenTypes.has(d.type) || !isolatedIds.has(d.id)));
     linkSel.classed("dimmed", true);
   } else {
     btn.style.borderColor="#334155"; btn.style.color="#475569"; btn.style.background="transparent";
@@ -2183,6 +2371,289 @@ function showConnPanel(srcId,tgtId,lbl){
   `;
   document.getElementById("conn-panel").style.display="block";
   applyAutoExpand("conn-body");
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TIMELINE
+// ══════════════════════════════════════════════════════════════════════════════
+let timelineOpen = false;
+let timelineSelectedDate = null;
+
+function toggleTimeline(){
+  timelineOpen = !timelineOpen;
+  document.getElementById('timeline-panel').classList.toggle('open', timelineOpen);
+  document.getElementById('timeline-toggle-btn').classList.toggle('open', timelineOpen);
+  if(timelineOpen){ renderTimeline(); fetchGHCommits(); }
+}
+
+function closeTimeline(){
+  timelineOpen = false;
+  document.getElementById('timeline-panel').classList.remove('open');
+  document.getElementById('timeline-toggle-btn').classList.remove('open');
+  selectTimelineDate(null);
+}
+
+function _fmtDate(d){
+  const months=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  const [y,m,day] = d.split('-');
+  return `${day} ${months[+m-1]} ${y}`;
+}
+
+function buildTimelineData(){
+  const dateMap = {};
+  nodes.forEach(n => {
+    if(n.workspace !== currentWorkspace) return;
+    const da = n.date_added || '2026-05-31';
+    if(!dateMap[da]) dateMap[da] = {added:[], updated:[]};
+    dateMap[da].added.push(n);
+    const lu = n.last_updated || '';
+    if(lu && lu !== da){
+      if(!dateMap[lu]) dateMap[lu] = {added:[], updated:[]};
+      dateMap[lu].updated.push(n);
+    }
+  });
+  return dateMap;
+}
+
+function selectTimelineDate(date){
+  timelineSelectedDate = date;
+  if(!date){
+    nodeSel.classed('timeline-hidden', false).classed('timeline-new', false);
+    linkSel.classed('timeline-hidden', false);
+  } else {
+    nodeSel.classed('timeline-hidden', n => {
+      if(n.workspace !== currentWorkspace) return false;
+      return (n.date_added || '2026-05-31') > date;
+    });
+    nodeSel.classed('timeline-new', n =>
+      n.workspace === currentWorkspace &&
+      (n.date_added || '2026-05-31') === date
+    );
+    linkSel.classed('timeline-hidden', l => {
+      const sn = nodeMap.get(l.source.id || l.source);
+      const tn = nodeMap.get(l.target.id || l.target);
+      if(sn?.workspace !== currentWorkspace || tn?.workspace !== currentWorkspace) return false;
+      return (sn?.date_added||'2026-05-31') > date ||
+             (tn?.date_added||'2026-05-31') > date;
+    });
+  }
+  if(timelineOpen) renderTimeline();
+}
+
+function renderTimeline(){
+  const dateMap = buildTimelineData();
+  const dates   = Object.keys(dateMap).sort();
+  const listEl  = document.getElementById('timeline-list');
+
+  // Group GitHub commits by date
+  const ghByDate = {};
+  if(ghCommits){
+    ghCommits.forEach(c => {
+      if(!ghByDate[c.date]) ghByDate[c.date] = [];
+      ghByDate[c.date].push(c);
+    });
+  }
+
+  if(!dates.length && !Object.keys(ghByDate).length){
+    listEl.innerHTML = '<div class="tl-empty">Нет карточек с датой<br>в текущей области</div>';
+    return;
+  }
+
+  let cumulative = 0;
+  const dateData = dates.map(d => {
+    cumulative += dateMap[d].added.length;
+    return {date:d, added:dateMap[d].added, updated:dateMap[d].updated, total:cumulative};
+  });
+  const maxAdded = Math.max(...dateData.map(d => d.added.length), 1);
+  const totalNow = nodes.filter(n => n.workspace === currentWorkspace).length;
+
+  let html = `<div class="tl-reset ${!timelineSelectedDate?'active':''}"
+    onclick="selectTimelineDate(null)">
+    ● Показать всё &nbsp;·&nbsp; ${totalNow} узлов
+    ${ghLoading ? '<span style="color:#334155;font-size:9px"> · GitHub…</span>' : ''}
+  </div>`;
+
+  [...dateData].reverse().forEach(({date, added, updated, total}) => {
+    const isSel = date === timelineSelectedDate;
+    const barW  = Math.max(Math.round(added.length / maxAdded * 80), 2);
+    const ghDay = ghByDate[date] || [];
+    const ghBadge = ghDay.length
+      ? ` <span style="color:#3b82f6;font-size:9px;font-weight:700">·${ghDay.length}</span>` : '';
+    html += `<div class="tl-entry ${isSel?'active':''}" onclick="selectTimelineDate('${date}')">
+      <span class="tl-date">${_fmtDate(date)}</span>
+      <span class="tl-bar" style="width:${barW}px"></span>
+      <span class="tl-count">+${added.length}${ghBadge}</span>
+    </div>`;
+    if(isSel){
+      html += `<div class="tl-details">
+        <div class="tl-total">В базе на дату: ${total} узлов</div>`;
+      if(added.length){
+        html += `<div class="tl-section-title">➕ Добавлено (${added.length}):</div>` +
+          added.map(n => {
+            const c = TYPES[n.type]?.color||'#475569';
+            return `<div class="tl-node" style="color:${c}"
+              onclick="event.stopPropagation();(function(){
+                const nd=nodeMap.get('${n.id}');
+                if(nd)showNodePanel(nd);
+              })()">
+              [${n.type}] ${n.label}</div>`;
+          }).join('');
+      }
+      if(updated.length){
+        html += `<div class="tl-section-title">✏ Обновлено (${updated.length}):</div>` +
+          updated.map(n => {
+            const c = TYPES[n.type]?.color||'#475569';
+            return `<div class="tl-node" style="color:${c}"
+              onclick="event.stopPropagation();(function(){
+                const nd=nodeMap.get('${n.id}');
+                if(nd)showNodePanel(nd);
+              })()">
+              ~ ${n.label}</div>`;
+          }).join('');
+      }
+      // GitHub commits for this date
+      if(ghDay.length){
+        html += `<div class="tl-section-title">🔗 GitHub (${ghDay.length}):</div>`;
+        ghDay.forEach(c => {
+          const idx     = ghCommits.indexOf(c);
+          const prevSha = idx + 1 < ghCommits.length ? ghCommits[idx+1].sha : '';
+          const msg     = c.message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          html += `<div class="tl-commit"
+            onclick="event.stopPropagation();expandCommit('${c.sha}','${prevSha}')">
+            <span class="tl-commit-sha">${c.shortSha}</span>
+            <span class="tl-commit-msg">${msg}</span>
+          </div>
+          <div id="tl-cd-${c.sha}" class="tl-commit-detail"></div>`;
+        });
+      } else if(ghCommits){
+        html += `<div style="font-size:9px;color:#1e293b;margin-top:3px">— нет коммитов GitHub</div>`;
+      }
+      html += `</div>`;
+    }
+  });
+
+  // Dates with GitHub commits but no frontmatter entries for current workspace
+  const pureGHDates = Object.keys(ghByDate).filter(d => !dateMap[d]).sort().reverse();
+  if(pureGHDates.length){
+    html += `<div class="tl-gh-only"><div class="tl-gh-only-hdr">💻 Прочие коммиты</div>`;
+    pureGHDates.forEach(d => {
+      html += `<div style="margin-bottom:5px">
+        <div style="font-size:9px;color:#334155;margin-bottom:2px">${_fmtDate(d)}</div>`;
+      ghByDate[d].forEach(c => {
+        const idx     = ghCommits.indexOf(c);
+        const prevSha = idx + 1 < ghCommits.length ? ghCommits[idx+1].sha : '';
+        const msg     = c.message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        html += `<div class="tl-commit"
+          onclick="event.stopPropagation();expandCommit('${c.sha}','${prevSha}')">
+          <span class="tl-commit-sha">${c.shortSha}</span>
+          <span class="tl-commit-msg">${msg}</span>
+        </div>
+        <div id="tl-cd-${c.sha}" class="tl-commit-detail"></div>`;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+  }
+
+  listEl.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GITHUB API LAYER
+// ══════════════════════════════════════════════════════════════════════════════
+const GH_REPO = 'bondf1408/biotech-knowledge-graph';
+const GH_API  = 'https://api.github.com';
+
+let ghCommits   = null;  // null=не загружено, []=загружено
+let ghLoading   = false;
+let ghError     = null;
+let ghNodeCache = {};    // sha → Set<nodeId>
+
+function _updateGHStatus(){
+  const el = document.getElementById('tl-gh-status');
+  if(!el) return;
+  if(ghLoading)       el.textContent = '🔗 загружаю…';
+  else if(ghError)    el.textContent = `🔗 недоступно`;
+  else if(ghCommits)  el.textContent = `🔗 ${ghCommits.length} коммитов`;
+  else                el.textContent = '';
+}
+
+async function fetchGHCommits(){
+  if(ghCommits !== null || ghLoading) return;
+  ghLoading = true;
+  _updateGHStatus();
+  try {
+    const r = await fetch(`${GH_API}/repos/${GH_REPO}/commits?per_page=100`);
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    ghCommits = data.map(c => ({
+      sha:      c.sha,
+      shortSha: c.sha.slice(0,7),
+      date:     c.commit.author.date.slice(0,10),
+      message:  c.commit.message.split('\n')[0].slice(0,70),
+    }));
+    ghLoading = false;
+    ghError   = null;
+  } catch(e){
+    ghLoading = false;
+    ghError   = e.message;
+    ghCommits = [];
+  }
+  _updateGHStatus();
+  if(timelineOpen) renderTimeline();
+}
+
+async function _fetchGHNodes(sha){
+  if(ghNodeCache[sha]) return ghNodeCache[sha];
+  const r = await fetch(
+    `${GH_API}/repos/${GH_REPO}/contents/graph_enrichment.js?ref=${sha}`
+  );
+  if(!r.ok) throw new Error(`HTTP ${r.status}`);
+  const data = await r.json();
+  const text = atob(data.content.replace(/[\n\r]/g,''));
+  const ids  = new Set([...text.matchAll(/\bid:\s*["']([^"']+)["']/g)].map(m=>m[1]));
+  ghNodeCache[sha] = ids;
+  return ids;
+}
+
+async function expandCommit(sha, prevSha){
+  const el = document.getElementById('tl-cd-' + sha);
+  if(!el) return;
+  // Toggle
+  if(el.dataset.loaded === sha){ el.innerHTML=''; el.dataset.loaded=''; return; }
+  el.innerHTML = '<div style="color:#334155;font-size:9px;padding:2px 0">загружаю…</div>';
+  el.dataset.loaded = sha;
+  try {
+    const cur = await _fetchGHNodes(sha);
+    let html  = '';
+    if(prevSha){
+      const prev    = await _fetchGHNodes(prevSha);
+      const added   = [...cur].filter(id => !prev.has(id));
+      const removed = [...prev].filter(id => !cur.has(id));
+      if(added.length){
+        html += `<div class="tl-section-title">➕ (${added.length}):</div>` +
+          added.map(id => {
+            const n = nodeMap.get(id);
+            const c = n ? (TYPES[n.type]?.color||'#475569') : '#475569';
+            const lbl = n ? `[${n.type}] ${n.label}` : id;
+            return `<div class="tl-node" style="color:${c}"
+              onclick="event.stopPropagation();(function(){const nd=nodeMap.get('${id}');if(nd)showNodePanel(nd)})()">
+              ${lbl}</div>`;
+          }).join('');
+      }
+      if(removed.length){
+        html += `<div class="tl-section-title">➖ (${removed.length}):</div>` +
+          removed.map(id=>`<div class="tl-node" style="color:#ef4444">${id}</div>`).join('');
+      }
+      if(!added.length && !removed.length)
+        html = '<div style="color:#334155;font-size:9px">только index.html / нет изменений графа</div>';
+    } else {
+      html = `<div style="color:#334155;font-size:9px">первый коммит · ${cur.size} узлов</div>`;
+    }
+    el.innerHTML = html;
+  } catch(e){
+    el.innerHTML = `<div style="color:#ef4444;font-size:9px">Ошибка: ${e.message}</div>`;
+  }
 }
 
 // ── Bootstrap: синхронизировать UI с загруженным состоянием ──────────────────
