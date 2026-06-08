@@ -60,13 +60,13 @@ body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; 
 .panel-btn { background: none; border: none; color: #475569; cursor: pointer;
   font-size: 14px; padding: 0 3px; line-height: 1; flex-shrink: 0; }
 .panel-btn:hover { color: #e2e8f0; }
-.panel-body { padding: 11px; overflow-y: auto; max-height: 74vh; transition: max-height .2s, padding .2s; }
+.panel-body { padding: 11px; overflow-y: auto; overflow-x: hidden; max-height: 74vh; transition: max-height .2s, padding .2s; word-break: break-word; overflow-wrap: anywhere; }
 .panel-body.collapsed { max-height: 0; padding: 0; overflow: hidden; }
 
 /* ── Node card internals ── */
 .card-badge { display: inline-block; font-size: 10px; font-weight: 700;
   padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
-.card-desc { font-size: 12px; color: #e2e8f0; line-height: 1.6; margin-bottom: 8px; }
+.card-desc { font-size: 12px; color: #e2e8f0; line-height: 1.6; margin-bottom: 8px; word-break: break-word; overflow-wrap: anywhere; }
 .card-meta { display: grid; grid-template-columns: auto 1fr; gap: 3px 8px; margin-bottom: 8px; }
 .card-meta-k { font-size: 10px; color: #64748b; white-space: nowrap; }
 .card-meta-v { font-size: 11px; color: #f1f5f9; }
@@ -75,10 +75,10 @@ body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; 
 .quant-block { background: #0f172a; border: 1px solid #1e293b; border-radius: 6px;
   padding: 7px 9px; margin-bottom: 8px; }
 .quant-row { font-size: 11px; color: #cbd5e1; padding: 2px 0;
-  border-bottom: 1px solid #1e293b; display: flex; gap: 6px; }
+  border-bottom: 1px solid #1e293b; display: flex; gap: 6px; flex-wrap: wrap; }
 .quant-row:last-child { border-bottom: none; }
-.quant-k { color: #94a3b8; flex-shrink: 0; }
-.quant-v { color: #ffffff; font-weight: 600; }
+.quant-k { color: #94a3b8; flex-shrink: 1; max-width: 58%; word-break: break-word; }
+.quant-v { color: #ffffff; font-weight: 600; min-width: 0; flex: 1 0 38%; word-break: break-word; overflow-wrap: anywhere; }
 .tag-strip { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; }
 .tag { background: #1e293b; border-radius: 3px; padding: 1px 5px; font-size: 10px; color: #64748b; }
 .sec-hdr { font-size: 10px; font-weight: 700; text-transform: uppercase;
@@ -392,6 +392,17 @@ svg { width: 100vw; height: 100vh; }
   display:inline-block; font-size:9px; color:#64748b; background:#1e293b;
   border-radius:3px; padding:1px 5px; margin-left:5px; vertical-align:middle;
 }
+
+/* ── Panel resize handle ── */
+.panel-resize {
+  position:absolute; bottom:0; right:0; width:14px; height:14px;
+  cursor:se-resize; z-index:10; border-radius:0 0 10px 0;
+  background: linear-gradient(135deg, transparent 55%, #334155 55%, #334155 65%, transparent 65%,
+    transparent 75%, #334155 75%, #334155 85%, transparent 85%);
+  opacity:0.5; transition:opacity .15s;
+}
+.panel-resize:hover { opacity:1; }
+.panel { position: relative; } /* ensure absolute positioning works for handle */
 </style>
 </head>
 <body>
@@ -442,6 +453,7 @@ svg { width: 100vw; height: 100vh; }
     <button class="panel-btn" onclick="closePanel('node')" title="Закрыть">✕</button>
   </div>
   <div class="panel-body" id="node-body"></div>
+  <div class="panel-resize" onmousedown="startPanelResize(event,'node')" title="Растянуть панель"></div>
 </div>
 
 <!-- Connection detail -->
@@ -452,6 +464,7 @@ svg { width: 100vw; height: 100vh; }
     <button class="panel-btn" onclick="closePanel('conn')" title="Закрыть">✕</button>
   </div>
   <div class="panel-body" id="conn-body"></div>
+  <div class="panel-resize" onmousedown="startPanelResize(event,'conn')" title="Растянуть панель"></div>
 </div>
 
 <!-- Compare panel -->
@@ -462,6 +475,7 @@ svg { width: 100vw; height: 100vh; }
     <button class="panel-btn" onclick="closePanel('cmp')" title="Закрыть">✕</button>
   </div>
   <div class="panel-body" id="cmp-body"></div>
+  <div class="panel-resize" onmousedown="startPanelResize(event,'cmp')" title="Растянуть панель"></div>
 </div>
 
 <div class="legend" id="legend"></div>
@@ -2656,6 +2670,59 @@ async function expandCommit(sha, prevSha){
   }
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// PANEL RESIZE
+// ══════════════════════════════════════════════════════════════════════════════
+const PANEL_SIZE_LS = 'biotech_panel_sizes_v1';
+
+function _applyPanelSize(panelId, w, h){
+  const panel = document.getElementById(panelId + '-panel');
+  const body  = document.getElementById(panelId + '-body');
+  if(!panel) return;
+  if(w) panel.style.width = w + 'px';
+  if(h){
+    panel.style.height = h + 'px';
+    const hdr = panel.querySelector('.panel-header');
+    if(body && hdr) body.style.maxHeight = (h - hdr.offsetHeight - 4) + 'px';
+  }
+}
+
+function startPanelResize(e, panelId){
+  e.preventDefault(); e.stopPropagation();
+  const panel  = document.getElementById(panelId + '-panel');
+  const body   = document.getElementById(panelId + '-body');
+  const hdr    = panel.querySelector('.panel-header');
+  const startX = e.clientX, startY = e.clientY;
+  const startW = panel.offsetWidth, startH = panel.offsetHeight;
+
+  function onMove(ev){
+    const dW = ev.clientX - startX, dH = ev.clientY - startY;
+    const newW = Math.max(260, startW + dW);
+    const newH = Math.max(120, startH + dH);
+    panel.style.width  = newW + 'px';
+    panel.style.height = newH + 'px';
+    if(body && hdr) body.style.maxHeight = (newH - hdr.offsetHeight - 4) + 'px';
+  }
+  function onUp(){
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('mouseup', onUp);
+    try {
+      const sizes = JSON.parse(localStorage.getItem(PANEL_SIZE_LS) || '{}');
+      sizes[panelId] = { w: panel.offsetWidth, h: panel.offsetHeight };
+      localStorage.setItem(PANEL_SIZE_LS, JSON.stringify(sizes));
+    } catch(_){}
+  }
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+}
+
+function loadPanelSizes(){
+  try {
+    const sizes = JSON.parse(localStorage.getItem(PANEL_SIZE_LS) || '{}');
+    Object.entries(sizes).forEach(([id, {w, h}]) => _applyPanelSize(id, w, h));
+  } catch(_){}
+}
+
 // ── Bootstrap: синхронизировать UI с загруженным состоянием ──────────────────
 (function bootstrap(){
   // Слайдеры
@@ -2679,6 +2746,7 @@ async function expandCommit(sha, prevSha){
   sim.force("link").distance(d => d.auto ? 220*linkDistMult : (130-d.weight*18)*linkDistMult);
   sim.force("cluster", makeClusterForce());
   refreshPinnedClass();
+  loadPanelSizes();
   sim.alpha(0.4);
 })();
 </script>
